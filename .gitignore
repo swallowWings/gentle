@@ -6,6 +6,19 @@
 *.user
 *.userosscache
 *.sln.docstates
+_ReSharper.*
+bin/Release/
+bin/Debug/
+bin/
+obj/Release/
+obj/Debug/
+obj/
+Release/
+Debug/
+/packages/
+*.pdb
+*.cache
+*.ide
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -15,15 +28,15 @@
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
+/x64/
+/x86/
 bld/
-[Bb]in/
-[Oo]bj/
+/[Bb]in/
+/[Oo]bj/
 [Ll]og/
 
 # Visual Studio 2015 cache/options directory
-.vs/
+/.vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
@@ -69,6 +82,8 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+
+
 
 # Chutzpah Test files
 _Chutzpah*
