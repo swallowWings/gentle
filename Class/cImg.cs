@@ -414,7 +414,8 @@ namespace gentle
         }
 
         public Bitmap MakeImgFileAndGetImgUsingArrayFromTL_InParallel(string imgFPNtoMake, double[,] array, float imgWidth,
-         float imgHeight, RendererIntervalType intervalType ,  RendererRange rangeType, double rendererMinV=0, double rendererMaxV=0, double nodataV = -9999)
+         float imgHeight, RendererIntervalType intervalType ,  RendererRange rangeType, 
+         double rendererMinV=0, double rendererMaxV=0, double nodataV = -9999)
         {
             try
             {
@@ -423,10 +424,10 @@ namespace gentle
                     int colxCount = array.GetLength(0);
                     int rowyCount = array.GetLength(1);
                     int CellCount = (colxCount * rowyCount);
-                    int CellWbmp = 0;
-                    int CellHbmp = 0;
-                    CellWbmp = Convert.ToInt32(imgWidth / colxCount);
-                    CellHbmp = Convert.ToInt32(imgHeight / rowyCount);
+                    int CellWbmp = 1;
+                    int CellHbmp = 1;
+                    //CellWbmp = Convert.ToInt32(imgWidth / colxCount);
+                    //CellHbmp =  Convert.ToInt32(imgHeight / rowyCount);
                     if (CellHbmp <= 0) { CellHbmp = 1; }
                     if (CellWbmp <= 0) { CellWbmp = 1; }
                     if (CellWbmp < CellHbmp)
