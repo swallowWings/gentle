@@ -15,6 +15,7 @@ namespace gentle
         {
             TEXTFILE,
             TIFFILE,
+            GRIBFILE,
             ASCFILE,
             ALLFILE,
             OUT_Discharge

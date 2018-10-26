@@ -450,13 +450,14 @@ namespace gentle
         }
 
 
-        public static void getTextInTextFile(string strSourceFPN, string strTagetFPN,
+        public static void MakeTextFileUisngTextInTextFile(string strSourceFPN, string strTagetFPN,
             int startingLineIndex , int endingLineIndex , int colidx, bool onlyNumeric)
         {
+            if (File.Exists(strTagetFPN) == true) { File.Delete(strTagetFPN); }
             string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
             string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
             StringBuilder sb = new StringBuilder();
-            if(startingLineIndex ==0 && endingLineIndex ==0)
+            if(startingLineIndex ==-1 && endingLineIndex ==-1)
             {
                 endingLineIndex = Lines.Length;
             }
@@ -468,9 +469,9 @@ namespace gentle
                     string v="" ;
                     if (texts.Length > colidx)
                     {
-                        if (onlyNumeric = true && cComTools.IsNumeric(texts[colidx]) == true)
+                        if (onlyNumeric = true)
                         {
-                            v = texts[colidx].Trim();
+                            if (cComTools.IsNumeric(texts[colidx]) == true) { v = texts[colidx].Trim(); }
                         }
                         else
                         {
@@ -490,10 +491,10 @@ namespace gentle
             File.AppendAllText(strTagetFPN, sb.ToString());
         }
 
-        public static void getTextInTextFile(string strSourceFPN, string strTagetFPN, 
+        public static void MakeTextFileUisngTextInTextFile(string strSourceFPN, string strTagetFPN, 
           string startingText, string endingText, int colidx, bool onlyNumeric)
         {
-
+            if (File.Exists(strTagetFPN) == true) { File.Delete(strTagetFPN); }
             string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
             string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
             StringBuilder sb = new StringBuilder();
@@ -513,9 +514,9 @@ namespace gentle
                     string v="";
                     if (texts.Length >colidx)
                     {
-                        if (onlyNumeric = true && cComTools.IsNumeric(texts[colidx]) == true)
+                        if (onlyNumeric = true)
                         {
-                            v = texts[colidx].Trim();
+                            if (cComTools.IsNumeric(texts[colidx]) == true)  { v = texts[colidx].Trim(); }
                         }
                         else
                         {
