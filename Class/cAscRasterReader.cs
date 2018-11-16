@@ -15,10 +15,7 @@ namespace gentle
         bool disposed = false;
         // Instantiate a SafeHandle instance.
         SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
-        //private string[] mLines;
         private string[] mLinesForHeader;
-        //private int mLineCountAll;
-        //private int mDataStartLineInASCfile;
         private double mDataValueOri;
         private cAscRasterHeader mHeader = new cAscRasterHeader();
         private string mHeaderStringAll;
