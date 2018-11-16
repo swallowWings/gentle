@@ -25,37 +25,11 @@ namespace gentle
         private string[] mSeparator = { " ", "\t", "," };
         private double[,] mValuesFromTL;
         public cRasterExtent extent;
+        private const int BigSizeThreshold = 400000000;//억개 기준
 
 
         public cAscRasterReader(string FPN)
         {
-            //if (isBigText == true)
-            //{
-            //    int r = 0;
-            //    using (TextReader reader = File.OpenText(FPN))
-            //    {
-            //        while ((mLines[r] = reader.ReadLine()) != null)
-            //        {
-            //            r++;
-            //        }
-            //    }
-            //}
-            //else
-            //{
-            //    mLines = System.IO.File.ReadAllLines(FPN, System.Text.Encoding.Default);
-            //}
-
-            //List<string > lines = new List<string>();
-            
-            //using (TextReader reader = File.OpenText(FPN))
-            //{
-            //    string al = "";
-            //    while ((al=reader.ReadLine()) != null)
-            //    {
-            //        lines.Add(al);
-            //        r++;
-            //    }
-            //}
             mLinesForHeader = new string[8];
             int r = 0;
             foreach (string line in File.ReadLines(FPN))
@@ -64,50 +38,63 @@ namespace gentle
                 mLinesForHeader[r] = line;
                 r++;
             }
-            //mDataStartLineInASCfile = GetDataStartLineInASCfile();
            mHeader = GetHeaderInfo(mLinesForHeader, mSeparator);
             mHeaderStringAll = cTextFile.MakeHeaderString(mHeader.numberCols, mHeader.numberRows,
                             mHeader.xllcorner, mHeader.yllcorner, mHeader.cellsize, mHeader.nodataValue.ToString());
             extent = new cRasterExtent(mHeader);
             mValuesFromTL = new double[mHeader.numberCols, mHeader.numberRows ];
-
-            int y = 0;
-            int nl = 0;
             int headerEndingIndex =mHeader .headerEndingLineIndex;
-            foreach (string  line in File.ReadLines (FPN))
+            bool isBigSize = false;
+            if(mHeader.numberCols * mHeader.numberRows > BigSizeThreshold) { isBigSize = true; }
+            if (isBigSize == false)
             {
-                if (nl> headerEndingIndex)
-                {
-                    string[] values = line.Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-                    for (int x = 0; x < values.Length; x++)
-                    {
-                        double v = 0;
-                        if (double.TryParse(values[x], out v) == true)
-                        {
-                            mValuesFromTL[x, y] = v;
-                        }
-                        else
-                        {
-                            mValuesFromTL[x, y] = Header.nodataValue;
-                        }
-                    }
-                    y++;
-                }
-                nl++;
+                string[] allLines = File.ReadAllLines(FPN, Encoding.Default);
+                //int y = 0;
+                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                Parallel.For(headerEndingIndex + 1, allLines.Length, options, delegate (int ly)
+                  {
+                      string[] values = allLines[ly].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
+                      int y = ly - headerEndingIndex - 1;
+                      for (int x = 0; x < values.Length; x++)
+                      {
+                          double v = 0;
+                          if (double.TryParse(values[x], out v) == true)
+                          {
+                              mValuesFromTL[x, y] = v;
+                          }
+                          else
+                          {
+                              mValuesFromTL[x, y] = Header.nodataValue;
+                          }
+                      }
+                  });
             }
-
-
-            //mLines = lines.ToArray();
-            //mLines = System.IO.File.ReadAllLines(FPN, System.Text.Encoding.Default);
-            //mLineCountAll = mLines.Length;
-
-
-            //if (mLineCountAll < mDataStartLineInASCfile)
-            //{
-            //    Console.WriteLine(FPN + " has no data valuable. ");
-            //    return;
-            //}
-
+            else
+            {
+                int nl = 0;
+                int y = 0;
+                foreach (string line in File.ReadLines(FPN))
+                {
+                    if (nl > headerEndingIndex)
+                    {
+                        string[] values = line.Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
+                        for (int x = 0; x < values.Length; x++)
+                        {
+                            double v = 0;
+                            if (double.TryParse(values[x], out v) == true)
+                            {
+                                mValuesFromTL[x, y] = v;
+                            }
+                            else
+                            {
+                                mValuesFromTL[x, y] = Header.nodataValue;
+                            }
+                        }
+                        y++;
+                    }
+                    nl++;
+                }
+            }           
         }
 
 
@@ -154,7 +141,7 @@ namespace gentle
         {
             cAscRasterHeader header = new cAscRasterHeader();
             header.dataStartingLineIndex = -1;
-            for (int ln = 0; ln <= LinesForHeader.Length - 1; ln++)
+            for (int ln = 0; ln < LinesForHeader.Length; ln++)
             {
                 string aline = LinesForHeader[ln];
                 string[] LineParts = aline.Split(separator, StringSplitOptions.RemoveEmptyEntries);

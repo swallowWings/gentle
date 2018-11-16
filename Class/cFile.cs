@@ -138,7 +138,7 @@ namespace gentle
 
         public static void RefreshOrderInDataTable(DataTable dt, string OrderColumeName)
         {
-            for (int i = 0; i <= dt.Rows.Count - 1; i++)
+            for (int i = 0; i < dt.Rows.Count; i++)
             {
                 dt.Rows[i][OrderColumeName] = i + 1;
             }
@@ -149,7 +149,7 @@ namespace gentle
             if (bSelected)
             {
                 mSourceFileList = new string[TargetListBox.SelectedItems.Count];
-                for (int i = 0; i <= mSourceFileList.Length - 1; i++)
+                for (int i = 0; i < mSourceFileList.Length; i++)
                 {
                     mSourceFileList[i] = Convert.ToString(TargetListBox.SelectedItems[i]);
                 }
@@ -157,7 +157,7 @@ namespace gentle
             else
             {
                 mSourceFileList = new string[TargetListBox.Items.Count];
-                for (int i = 0; i <= mSourceFileList.Length - 1; i++)
+                for (int i = 0; i < mSourceFileList.Length; i++)
                 {
                     mSourceFileList[i] = Convert.ToString(TargetListBox.Items[i]);
                 }
@@ -345,7 +345,7 @@ namespace gentle
             ofrmPrograssBar.Show();
             System.Windows.Forms.Application.DoEvents();
             dtTarget.BeginLoadData();
-            for (int i = 0; i <= items.Length - 1; i++)
+            for (int i = 0; i < items.Length; i++)
             {
                 string strFNameOnly = Path.GetFileName(items[i]);
                 DataRow nr = dtTarget.NewRow();
@@ -420,7 +420,7 @@ namespace gentle
                 string fnOnly = Path.GetFileName(sourceFPN);
                 string fp = Path.GetDirectoryName(sourceFPN);
                 string[] files = Directory.GetFiles(fp);
-                for (int n = 0; n <= files.Length - 1; n++)
+                for (int n = 0; n < files.Length; n++)
                 {
                     if (Path.GetFileNameWithoutExtension(files[n]) == fnWOe && files[n] != sourceFPN)
                     {

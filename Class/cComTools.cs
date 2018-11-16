@@ -28,7 +28,7 @@ namespace gentle
             }
             else
             {
-                return String.Format(((double) nowT_MIN_elapsed / 60).ToString("F2"));
+                return string.Format(((double) nowT_MIN_elapsed / 60).ToString("F2"));
             }
         }
 
@@ -36,12 +36,12 @@ namespace gentle
         {
             if (bDateTimeFormat == true)
             {
-                return String.Format(Convert.ToDateTime(startDateTime).Add(new System.TimeSpan(0, nowT_MIN_elapsed, 0)).ToString (),
+                return string.Format(Convert.ToDateTime(startDateTime).Add(new System.TimeSpan(0, nowT_MIN_elapsed, 0)).ToString (),
                     stringFormat);
             }
             else
             {
-                return String.Format((nowT_MIN_elapsed / 60).ToString("F"));
+                return string.Format((nowT_MIN_elapsed / 60).ToString("F"));
             }
         }
 
@@ -115,7 +115,7 @@ namespace gentle
         public static List<string> GetListFromDataTable(DataTable indt, int cidx)
         {
             List<string> nl = new List<string>();
-            for (int nr = 0; nr <= indt.Rows.Count - 1; nr++)
+            for (int nr = 0; nr < indt.Rows.Count; nr++)
             {
                 nl.Add(indt.Rows[nr].ItemArray[cidx].ToString());
             }
@@ -127,7 +127,7 @@ namespace gentle
             List<string> l = new List<string>();
             if (ListCountToSet > 1)
             {
-                for (int n = 0; n <= ListCountToSet - 1; n++)
+                for (int n = 0; n < ListCountToSet; n++)
                 {
                     int travel_min = n * TimeInterval_Min;
                     string T = Convert.ToDateTime(rainfallStartDateTime).Add(new System.TimeSpan(0, travel_min, 0)).ToString("yyyy/MM/dd HH:mm") ;
