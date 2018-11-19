@@ -10,7 +10,7 @@ namespace gentle
 {
     public class cTextFile
     {
-        private const int BigSizeThreshold = 400000000;//억개 기준
+        private const int BigSizeThreshold = 200000000;//2억개 기준
         public enum ValueSeparator
         {
             CSV,
@@ -270,7 +270,7 @@ namespace gentle
                     {
                         if (array[nc, nr] == 0 || array[nc, nr] == nodataValue)
                         {
-                            sbALL.Append(array[nc, nr].ToString("F0") + " ");
+                            sbALL.Append(array[nc, nr].ToString() + " ");
                         }
                         else
                         {
@@ -290,7 +290,7 @@ namespace gentle
                     {
                         if (array[nc, nr] == 0 || array[nc, nr] == nodataValue)
                         {
-                            sbArow.Append(array[nc, nr].ToString("F0") + " ");
+                            sbArow.Append(array[nc, nr].ToString() + " ");
                         }
                         else
                         {

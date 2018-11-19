@@ -22,7 +22,7 @@ namespace gentle
         private string[] mSeparator = { " ", "\t", "," };
         private double[,] mValuesFromTL;
         public cRasterExtent extent;
-        private const int BigSizeThreshold = 400000000;//억개 기준
+        private const int BigSizeThreshold = 200000000;//2억개 기준
 
 
         public cAscRasterReader(string FPN)
