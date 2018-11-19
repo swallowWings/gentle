@@ -49,7 +49,6 @@ namespace gentle
             if (isBigSize == false)
             {
                 string[] allLines = File.ReadAllLines(FPN, Encoding.Default);
-                //int y = 0;
                 var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
                 Parallel.For(headerEndingIndex + 1, allLines.Length, options, delegate (int ly)
                   {
@@ -100,7 +99,6 @@ namespace gentle
 
         public void Dispose()
         {
-            // Dispose of unmanaged resources.
             Dispose(true);
             // Suppress finalization.
             GC.SuppressFinalize(this);
