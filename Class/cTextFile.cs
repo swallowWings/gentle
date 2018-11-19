@@ -76,7 +76,6 @@ namespace gentle
             return true;
         }
 
-
         public static string MakeHeaderString(int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue)
         {
             string header = "";
@@ -88,7 +87,6 @@ namespace gentle
             header = header + "NODATA_value" + " " + nodataValue + "\r\n";
             return header;
         }
-
 
         public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue, string[] rowsArray)
         {
@@ -152,11 +150,9 @@ namespace gentle
             return true;
         }
 
-
         public static double[,] addTwoDimArrayOfASCraster(double[,] inArray1, double[,] inArray2, double nodataValue, bool allowNegative = false)
         {
             double[,] array = new double[inArray1.GetLength(0), inArray1.GetLength(1)];
-
             //for (int y = 0; y < array.GetLength(1) ; y++)
             //{
             //    for (int x = 0; x < array.GetLength(0); x++)
