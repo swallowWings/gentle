@@ -511,9 +511,9 @@ namespace gentle
             Bitmap bm = new Bitmap(Convert.ToInt32(LayerCellWcount * CellWbmp) + 1, Convert.ToInt32(LayerCellHcount * CellHbmp) + 1);
             Graphics gr = Graphics.FromImage(bm);
             gr.Clear(Color.White);
-            for (int r = 0; r <= LayerCellHcount - 1; r++)
+            for (int r = 0; r < LayerCellHcount; r++)
             {
-                for (int c = 0; c <= LayerCellWcount - 1; c++)
+                for (int c = 0; c < LayerCellWcount; c++)
                 {
                     Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
                     Color cToShow = default(Color);

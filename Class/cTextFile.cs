@@ -10,6 +10,7 @@ namespace gentle
 {
     public class cTextFile
     {
+        private const int BigSizeThreshold = 200000000;//2억개 기준
         public enum ValueSeparator
         {
             CSV,
@@ -75,7 +76,6 @@ namespace gentle
             return true;
         }
 
-
         public static string MakeHeaderString(int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue)
         {
             string header = "";
@@ -88,13 +88,12 @@ namespace gentle
             return header;
         }
 
-
         public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue, string[] rowsArray)
         {
             if (File.Exists(fpn) == true) { File.Delete(fpn); }
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
-            for (int n = 0; n <= rowsArray.Length - 1; n++)
+            for (int n = 0; n < rowsArray.Length; n++)
             {
                 File.AppendAllText(fpn, rowsArray[n] + "\r\n");
             }
@@ -106,12 +105,12 @@ namespace gentle
             if (File.Exists(fpn) == true)
             {
                 File.Delete(fpn);
-                int delayTime = 0;
+                //int delayTime = 0;
             }
             if (File.Exists(fpn) == false)
             {
                 File.AppendAllText(fpn, allHeader);
-                for (int n = 0; n <= strArray.Length - 1; n++)
+                for (int n = 0; n < strArray.Length; n++)
                 {
                     File.AppendAllText(fpn, strArray[n] + "\r\n");
                 }
@@ -141,7 +140,7 @@ namespace gentle
             if (File.Exists(fpn) == true)
             {
                 File.Delete(fpn);
-                int delayTime = 0;
+                //int delayTime = 0;
             }
             if (File.Exists (fpn)==false )
             {
@@ -151,11 +150,9 @@ namespace gentle
             return true;
         }
 
-
         public static double[,] addTwoDimArrayOfASCraster(double[,] inArray1, double[,] inArray2, double nodataValue, bool allowNegative = false)
         {
             double[,] array = new double[inArray1.GetLength(0), inArray1.GetLength(1)];
-
             //for (int y = 0; y < array.GetLength(1) ; y++)
             //{
             //    for (int x = 0; x < array.GetLength(0); x++)
@@ -251,44 +248,68 @@ namespace gentle
         private static void WriteTwoDimData(string fpn, double[,] array, int decimalPartNum, int nodataValue)
         {
             string dpn = "";
-            if (decimalPartNum == 1) { dpn = "F1"; }
-            if (decimalPartNum == 2) { dpn = "F2"; }
-            if (decimalPartNum == 3) { dpn = "F3"; }
-            if (decimalPartNum == 4) { dpn = "F4"; }
-            if (decimalPartNum == 5) { dpn = "F5"; }
-            if (decimalPartNum == 6) { dpn = "F6"; }
-            if (decimalPartNum == 7) { dpn = "F7"; }
-            //StringBuilder sbArow = new StringBuilder();
+            if (decimalPartNum == 0) { dpn = "F0"; }
+            else if (decimalPartNum == 1) { dpn = "F1"; }
+            else if (decimalPartNum == 2) { dpn = "F2"; }
+            else if (decimalPartNum == 3) { dpn = "F3"; }
+            else if (decimalPartNum == 4) { dpn = "F4"; }
+            else if (decimalPartNum == 5) { dpn = "F5"; }
+            else if (decimalPartNum == 6) { dpn = "F6"; }
+            else if (decimalPartNum == 7) { dpn = "F7"; }
             int nx = array.GetLength(0);
             int ny = array.GetLength(1);
-            for (int nr = 0; nr < ny; nr++)
+            bool isBigSize = false;
+            if (nx * ny > BigSizeThreshold) { isBigSize = true; }
+
+            if (isBigSize==false )
             {
-                StringBuilder sbArow = new StringBuilder();
-                for (int nc = 0; nc < nx; nc++)
+                StringBuilder sbALL = new StringBuilder("");
+                for (int nr = 0; nr < ny; nr++)
                 {
-                    if (decimalPartNum ==0 || array[nc, nr]==0|| array[nc, nr] == nodataValue )
+                    for (int nc = 0; nc < nx; nc++)
                     {
-                       sbArow.Append(((int)array[nc, nr]).ToString() + " ");
+                        if (array[nc, nr] == 0 || array[nc, nr] == nodataValue)
+                        {
+                            sbALL.Append(array[nc, nr].ToString() + " ");
+                        }
+                        else
+                        {
+                            sbALL.Append(array[nc, nr].ToString(dpn) + " ");
+                        }
                     }
-                    else
-                    {
-                        sbArow.Append(array[nc, nr].ToString(dpn) + " ");
-                    }
+                    sbALL.Append("\r\n");
                 }
-                sbArow.Append("\r\n");
-                File.AppendAllText(fpn, sbArow.ToString());
-                if (nr % 100 == 0) { GC.Collect(); }
+                File.AppendAllText(fpn, sbALL.ToString());
             }
-            //File.AppendAllText(fpn, sbALL.ToString());
+            else
+            {
+                for (int nr = 0; nr < ny; nr++)
+                {
+                    StringBuilder sbArow = new StringBuilder();
+                    for (int nc = 0; nc < nx; nc++)
+                    {
+                        if (array[nc, nr] == 0 || array[nc, nr] == nodataValue)
+                        {
+                            sbArow.Append(array[nc, nr].ToString() + " ");
+                        }
+                        else
+                        {
+                            sbArow.Append(array[nc, nr].ToString(dpn) + " ");
+                        }
+                    }
+                    sbArow.Append("\r\n");
+                    File.AppendAllText(fpn, sbArow.ToString());
+                    if (nr % 300 == 0) { GC.Collect(); }
+                }
+            }
         }
 
-
-        private static void WriteTwoDimData_old(string fpn, double[,] array)
+        private static void WriteTwoDimData_old_201810(string fpn, double[,] array)
         {
             StringBuilder sbALL = new StringBuilder("");
-            for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
+            for (int nr = 0; nr < array.GetLength(1); nr++)
             {
-                for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
+                for (int nc = 0; nc < array.GetLength(0); nc++)
                 {
                     sbALL.Append(array[nc, nr].ToString("F2"));
                     sbALL.Append(" ");
@@ -301,10 +322,10 @@ namespace gentle
         private static void WriteTwoDimData_old_v20180627(string fpn, double [,] array)
         {
             string rows = "";
-            for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
+            for (int nr = 0; nr < array.GetLength(1); nr++)
             {
                 string arow = "";
-                for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
+                for (int nc = 0; nc < array.GetLength(0); nc++)
                 {
                     arow = arow + array[nc, nr].ToString("F2") + " ";
                 }
@@ -450,13 +471,14 @@ namespace gentle
         }
 
 
-        public static void getTextInTextFile(string strSourceFPN, string strTagetFPN,
+        public static void MakeTextFileUisngTextInTextFile(string strSourceFPN, string strTagetFPN,
             int startingLineIndex , int endingLineIndex , int colidx, bool onlyNumeric)
         {
+            if (File.Exists(strTagetFPN) == true) { File.Delete(strTagetFPN); }
             string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
             string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
             StringBuilder sb = new StringBuilder();
-            if(startingLineIndex ==0 && endingLineIndex ==0)
+            if(startingLineIndex ==-1 && endingLineIndex ==-1)
             {
                 endingLineIndex = Lines.Length;
             }
@@ -468,9 +490,9 @@ namespace gentle
                     string v="" ;
                     if (texts.Length > colidx)
                     {
-                        if (onlyNumeric = true && cComTools.IsNumeric(texts[colidx]) == true)
+                        if (onlyNumeric == true)
                         {
-                            v = texts[colidx].Trim();
+                            if (cComTools.IsNumeric(texts[colidx]) == true) { v = texts[colidx].Trim(); }
                         }
                         else
                         {
@@ -490,10 +512,10 @@ namespace gentle
             File.AppendAllText(strTagetFPN, sb.ToString());
         }
 
-        public static void getTextInTextFile(string strSourceFPN, string strTagetFPN, 
+        public static void MakeTextFileUisngTextInTextFile(string strSourceFPN, string strTagetFPN, 
           string startingText, string endingText, int colidx, bool onlyNumeric)
         {
-
+            if (File.Exists(strTagetFPN) == true) { File.Delete(strTagetFPN); }
             string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
             string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
             StringBuilder sb = new StringBuilder();
@@ -501,7 +523,7 @@ namespace gentle
             bool endingConditionApplied = true;
             if (startingText == "") { started = true; }
             if (endingText == "") { endingConditionApplied = false; }
-            for (int n = 0; n <= Lines.Length - 1; n++)
+            for (int n = 0; n < Lines.Length; n++)
             {
                 if (started==false && Lines[n].Contains(startingText))
                 {
@@ -513,9 +535,9 @@ namespace gentle
                     string v="";
                     if (texts.Length >colidx)
                     {
-                        if (onlyNumeric = true && cComTools.IsNumeric(texts[colidx]) == true)
+                        if (onlyNumeric == true)
                         {
-                            v = texts[colidx].Trim();
+                            if (cComTools.IsNumeric(texts[colidx]) == true)  { v = texts[colidx].Trim(); }
                         }
                         else
                         {
@@ -571,7 +593,7 @@ namespace gentle
             try
             {
                 string[] Lines = System.IO.File.ReadAllLines(strSourceFNP);
-                for (int n = 0; n <= Lines.Length - 1; n++)
+                for (int n = 0; n < Lines.Length; n++)
                 {
                     if (Lines[n].Contains(ContainedTextInALine))
                     {
@@ -590,7 +612,7 @@ namespace gentle
         {
             try
             {
-                for (int n = 0; n <= sourceArray.Length - 1; n++)
+                for (int n = 0; n < sourceArray.Length; n++)
                 {
                     if (sourceArray[n].Contains(textToFindInALine))
                     {
@@ -771,7 +793,7 @@ namespace gentle
                 int intTotCountLine = strLines.Length;
                 int intNLine = 0;
                 //string strOneLine = null;
-                for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
+                for (intNLine = 0; intNLine < intTotCountLine ; intNLine++)
                 {
                     if (endingLineIndex > 0 && intNLine > endingLineIndex)
                     {
@@ -870,7 +892,7 @@ namespace gentle
                     string[] parts = line.Split(sep, StringSplitOptions.RemoveEmptyEntries);
                     if (string.IsNullOrEmpty(parts[0].ToString().Trim()))
                     {
-                        Console.WriteLine(String.Format("{0} line has empty value. Exit reading text file process.", intL + 1));
+                        Console.WriteLine(string.Format("{0} line has empty value. Exit reading text file process.", intL + 1));
                         break;
                     }
                     int nFieldCount = parts.Length;
@@ -889,7 +911,7 @@ namespace gentle
                     else
                     {
                         DataRow nr = dt.NewRow();
-                        for (int nG1 = 0; nG1 <= nFieldCount - 1; nG1++)
+                        for (int nG1 = 0; nG1 < nFieldCount; nG1++)
                         {
                             nr.ItemArray[nG1] = parts[nG1].ToString();
                         }
@@ -926,7 +948,7 @@ namespace gentle
             {
                 BaseString[0] = BaseString[0] + SeparatorInReturnArray + colName;
             }
-            for (int nl = 0; nl <= Lines.Length - 1; nl++)
+            for (int nl = 0; nl < Lines.Length; nl++)
             {
                 if (nl >= rowNtoBeginRead - 1)
                 {
@@ -966,7 +988,7 @@ namespace gentle
             string[] Lines = System.IO.File.ReadAllLines(fpnSource);
             int nr = 0;
             string[] sepArray = GetTextFileValueSeparator(valueSeparator);
-            for (int nl = 0; nl <= Lines.Length - 1; nl++)
+            for (int nl = 0; nl < Lines.Length; nl++)
             {
                 string aLine = Lines[nl];
                 string[] parts = aLine.Split(sepArray, StringSplitOptions.RemoveEmptyEntries);

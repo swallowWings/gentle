@@ -43,7 +43,7 @@ namespace gentle
             //{
             Parallel.For(0, ny, options, delegate (int y)
             {
-                for (int x = 0; x <= nx - 1; x++)
+                for (int x = 0; x < nx; x++)
                 {
                     double v1;
                     double v2;
@@ -102,7 +102,7 @@ namespace gentle
             //{ 
             Parallel.For(0, ny, options, delegate (int y)
             {
-                for (int x = 0; x <= nx - 1; x++)
+                for (int x = 0; x < nx; x++)
                 {
                     double v1;
                     double v2;
