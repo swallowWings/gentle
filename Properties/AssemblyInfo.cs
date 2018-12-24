@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyCompany("KICT")]
 [assembly: AssemblyProduct("gentle")]
 [assembly: AssemblyCopyright("Copyright ©  KICT 2017")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("gentle")]
 [assembly: AssemblyCulture("")]
 
 // ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 

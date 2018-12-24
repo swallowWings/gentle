@@ -25,6 +25,19 @@ namespace gentle
             }
         }
 
+        public static string getOperatorFromString(string inString)
+        {
+            string[] operators = { ",", "(", ")", "+", "-", "*", "/", "^", "=", ">", "<", ">=", "<=" };
+            foreach (string op in operators )
+            {
+                if (inString.Contains (op.Trim()))
+                {
+                    return op;
+                }
+            }
+            return "";
+        }
+
         public static double[,] calculate2DArryUsing2TermAlgebra(string inOperator, bool is1ASC, bool is2ASC,
             bool is1ASCnodataAsZero, bool is2ASCnodataAsZero,
             double[,] asc1 = null, double[,] asc2 = null, double value1 = 0, double value2 = 0, double nodataValue = -9999)
@@ -209,6 +222,9 @@ namespace gentle
                     { vout = v1 / v2; }
                     else
                     { vout = nodataValue; }
+                    break;
+                case "^":
+                    vout = Math.Pow(v1, v2);
                     break;
                 default:
                     vout = nodataValue;
