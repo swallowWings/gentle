@@ -27,7 +27,7 @@ namespace gentle
 
         public static string getOperatorFromString(string inString)
         {
-            string[] operators = { ",", "(", ")", "+", "-", "*", "/", "^", "=", ">", "<", ">=", "<=" };
+            string[] operators = { ",", "(", ")", "+", "-", "*", "/", "^", ">=", "<=", "=", ">", "<"};
             foreach (string op in operators )
             {
                 if (inString.Contains (op.Trim()))
@@ -111,12 +111,17 @@ namespace gentle
             int nx = resultArr.GetLength(0);
             ParallelOptions options = new ParallelOptions();
             options.MaxDegreeOfParallelism = Environment.ProcessorCount;
-            // For y As Integer = 0 To nRowy - 1
-            //{ 
+            //for(int y = 0;y<ny;y++)
+            //{
+
             Parallel.For(0, ny, options, delegate (int y)
             {
                 for (int x = 0; x < nx; x++)
                 {
+                    //if (x==192 && y==55)
+                    //{
+                    //    int a = 1;
+                    //}
                     double v1;
                     double v2;
                     double vT;
