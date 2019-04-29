@@ -27,14 +27,54 @@ namespace gentle
 
         public static string getOperatorFromString(string inString)
         {
-            string[] operators = { ",", "(", ")", "+", "-", "*", "/", "^", ">=", "<=", "=", ">", "<"};
-            foreach (string op in operators )
+            //string[] operators = { ",", "(", ")", "=+", "=-", ">=+", ">=-", "<=+", "<=-", ">+", ">-", "<+", "<-", "/+", "/-", "^+", "^-", ">=", "<=", "=", ">", "<", "+", "-", "*", "/", "^" };
+            string[] operators_sep = { ",", "(", ")"};
+            foreach (string op in operators_sep)
+            {
+                if (inString.Contains(op.Trim()))
+                {
+                    return op;
+                }
+            }
+
+            string[] operators_condition = {">=", "<=", "=", ">", "<"};
+            foreach (string op in operators_condition)
+            {
+                if (inString.Contains(op.Trim()))
+                {
+                    return op;
+                }
+            }
+            string[] operators_Math = { "*", "/", "^", "+", "-" };
+            foreach (string op in operators_Math)
             {
                 if (inString.Contains (op.Trim()))
                 {
                     return op;
                 }
             }
+            //위에서 다 걸러 지지만.. 혹시 걸러 지지 않으면 여기서 처리
+            string[] operators_con_ToRev = { "=+", "=-", ">=+", ">=-", "<=+", "<=-", ">+", ">-", "<+", "<-", "/+", "/-", "^+", "^-" };
+            foreach (string op in operators_con_ToRev)
+            {
+                if (inString.Contains(op.Trim()))
+                {
+                    string remains = op.Substring(0, op.Length - 1);
+                    return remains;
+                }
+            }
+
+            //위에서 다 걸러 지지만.. 혹시 걸러 지지 않으면 여기서 처리
+            string[] operators_con_ToRev2 = { "= +", "= -", ">= +", ">= -", "<= +", "<= -", "> +", "> -", "< +", "< -", "/ +", "/ -", "^ +", "^ -" };
+            foreach (string op in operators_con_ToRev2)
+            {
+                if (inString.Contains(op.Trim()))
+                {
+                    string remains = op.Substring(0, op.Length - 2);
+                    return remains;
+                }
+            }
+
             return "";
         }
 
