@@ -111,7 +111,6 @@ namespace gentle
             {
                 handle.Dispose();
                 // Free any other managed objects here.
-                //
             }
 
             disposed = true;
@@ -128,7 +127,6 @@ namespace gentle
                 LinesForHeader[r] = line;
                 r++;
             }
-           //int dataStartLineInASCfile = GetDataStartLineInASCfile(LinesForHeader, separator);
             return GetHeaderInfo(LinesForHeader, separator);
         }
 
@@ -225,14 +223,6 @@ namespace gentle
             return header;
         }
 
-        //public int RowCountAll
-        //{
-        //    get
-        //    {
-        //        return mLineCountAll;
-        //    }
-        //}
-
         public cAscRasterHeader Header
         {
             get
@@ -259,8 +249,6 @@ namespace gentle
 
         public static bool CheckTwoGridLayerExtent( cAscRasterReader  GridBase, cAscRasterReader GridTarget)
         {
-            //   cTextFileReaderASC oGridExtBase = new ct 
-            //'    Dim oGridExtTarget As New cGrid(GridTarget)
             if (GridBase.Header.numberCols  != GridTarget.Header.numberCols ){ return false; }
             if (GridBase.Header.numberRows  != GridTarget.Header.numberRows) { return false; }
             if (GridBase.extent.bottom != GridTarget.extent.bottom) { return false; }
@@ -280,10 +268,8 @@ namespace gentle
         public static CellPosition[] GetPositiveCellsPositions(cAscRasterReader inGrid)
         {
             List<CellPosition> cells = new List<CellPosition>();
-            //double[,] oriValues = inGrid.ValuesAllFromTLasTwoDimArray(); 
             for (int y = 0; y < inGrid.Header.numberRows; y++)
             {
-                //string[] aline = inGrid.ValuesInOneRowFromTopLeft(y);
                 for (int x = 0; x < inGrid.Header.numberCols; x++)
                 {
                     if (inGrid.ValueFromTL(x, y) > 0)
@@ -299,10 +285,8 @@ namespace gentle
         }
 
 
-
         public static double CellsAverageValue(CellPosition[] targetCells, cAscRasterReader inASC, bool allowNegative)
         {
-            //double[,] oriValues = inASC.va.ValuesAllFromTLasTwoDimArray();
             double sum = 0;
             for (int n = 0; n < targetCells.Length; n++)
             {
@@ -322,60 +306,6 @@ namespace gentle
         {
             Console.WriteLine("This was not developed yet.");
         }
-
-
-
-        //'Public Shared Function CreateNewGrid(baseGrid As MapWinGIS.Grid, _
-        //'                                     fpn As String, dataType As MapWinGIS.GridDataType, _
-        //'                                     defaultValue As Integer) As MapWinGIS.Grid
-        //'    Dim dG As New MapWinGIS.Grid ' 빈 데이터셑 생성
-        //'    'Dim hG As New MapWinGIS.GridHeader ' 빈 해더 생성
-        //'    dG.CreateNew(fpn, baseGrid.Header, dataType, defaultValue, _
-        //'                        True, MapWinGIS.GridFileType.GeoTiff)
-        //'    dG.Save()
-        //'    Return dG
-        //'End Function
-
-        //private void getValuesAllFromTLasTwoDimArray()
-        //{
-        //    mValuesFromTL = new double[Header.numberCols, Header.numberRows];
-        //    //for(int y = 0; y<Header .numberRows;y++ )
-        //    //{
-        //    //    for (int x =0; x< Header .numberCols;x++)
-        //    //    {
-        //    //        mValuesAllFromTLasTwoDimArray[x,y]=ValueFromTL(x, y);
-        //    //    }
-        //    //}
-
-        //    var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount  };
-        //    string[] rows = new string[Header.numberRows];
-        //    Parallel.For(0, Header.numberRows, options, delegate (int y)
-        //    {
-        //        string[] aline = ValuesInOneRowFromTopLeft(y);
-        //        for (int x = 0; x < Header.numberCols; x++)
-        //        {
-        //            double v;
-        //            if (double.TryParse(aline[x], out v) == true)
-        //            {
-        //                mValuesFromTL[x, y] = v;
-        //            }
-        //            else
-        //            {
-        //                mValuesFromTL[x, y] = Header.nodataValue;
-        //            }
-        //        }
-        //    });
-        //}
-
-        //public double[,] ValuesAllFromTLasTwoDimArray()
-        //{
-        //    //mValuesAllFromTLasTwoDimArray = new double[Header.numberCols, Header.numberRows];
-        //    if (mValuesFromTL==null)
-        //    {
-        //        getValuesAllFromTLasTwoDimArray();
-        //    }
-        //    return mValuesFromTL;
-        //}
 
 
         /// <summary>
@@ -399,16 +329,6 @@ namespace gentle
         public double ValueFromTL(int xColNumber, int yRowNumber)
         {
             return mValuesFromTL[xColNumber, yRowNumber];
-            //string[] LVals = mLines[mDataStartLineInASCfile + yRowNumber - 1].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-            //float result = 0;
-            //if (float.TryParse(LVals[xColNumber], out result))
-            //{
-            //    return result;
-            //}
-            //else
-            //{
-            //    return -9999;
-            //}
         }
 
 
@@ -421,16 +341,6 @@ namespace gentle
         public double[,] ValuesFromTL()
         {
             return mValuesFromTL;
-            //string[] LVals = mLines[mDataStartLineInASCfile + yRowNumber - 1].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-            //float result = 0;
-            //if (float.TryParse(LVals[xColNumber], out result))
-            //{
-            //    return result;
-            //}
-            //else
-            //{
-            //    return -9999;
-            //}
         }
 
         /// <summary>
@@ -472,20 +382,6 @@ namespace gentle
             }
         }
 
-        //private static  int GetDataStartLineInASCfile(string[] LinesForHeader, string[] separator)
-        //{
-        //    for (int ln = 0; ln <= LinesForHeader.Length - 1; ln++)
-        //    {
-        //        string aline = LinesForHeader[ln];
-        //        string[] LineParts = aline.Split(separator, StringSplitOptions.RemoveEmptyEntries);
-        //        float Val = 0;
-        //        if (LineParts.Length > 0 && float.TryParse(LineParts[0], out Val) == true)
-        //        {
-        //            return ln + 1;
-        //        }
-        //    }
-        //    return -1;
-        //}
 
         public int DataStartLineInASCfile
         {
@@ -495,57 +391,16 @@ namespace gentle
             }
         }
 
-        //public string[] ValuesInOneRowFromLowLeft(int yrow)
-        //{
-        //    int row = mLineCountAll - yrow - 1;
-        //    return mLines[row].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-        //}
-
-
-        //public string[] ValuesInOneRowFromTopLeft(int yrow)
-        //{
-
-        //    int row = mDataStartLineInASCfile + yrow - 1;
-        //    return mLines[row].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-        //}
 
         public string OneRowContainsValuesFromTop(int yrowIndex)
         {
-            //int row = mDataStartLineInASCfile + yrowIndex - 1;
             StringBuilder sb = new StringBuilder();
             for (int x = 0; x < mHeader.numberCols; x++)
             {
                 sb.Append(mValuesFromTL[x, yrowIndex] + " ");
             }
-            //return mLines[row];
             return sb.ToString();
         }
-
-        //public float ValueAtColumeXFormOneRow(int xcol, string[] Values)
-        //{
-        //    float result = 0;
-        //    if (float.TryParse(Values[xcol], out result))
-        //    {
-        //        return result;
-        //    }
-        //    else
-        //    {
-        //        return -9999;
-        //    }
-        //}
-
-        //public float ValueAtColumeXFormOneRowAsNotNegative(int xcol, string[] Values)
-        //{
-        //    mDataValueOri = ValueAtColumeXFormOneRow(xcol, Values);
-        //    if (mDataValueOri < 0)
-        //    {
-        //        return 0;
-        //    }
-        //    else
-        //    {
-        //        return mDataValueOri;
-        //    }
-        //}
 
         public static bool CompareFiles(cAscRasterReader FileToReference, cAscRasterReader FileToCompare)
         {

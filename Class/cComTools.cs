@@ -17,7 +17,7 @@ namespace gentle
             for (int a = 0; a < 10; a++)
             {
                 tmp += 1;
-            }// time delay
+            }
         }
 
         public static string GetTimeToPrintOut(bool bDateTimeFormat, string startDateTime, int nowT_MIN_elapsed)
@@ -62,10 +62,6 @@ namespace gentle
             string strNowTimeToPrintOut = null;
             try
             {
-                //strStartingTime = strStartingTime.Replace("/", "");
-                //strStartingTime = strStartingTime.Replace(" ", "");
-                //strStartingTime = strStartingTime.Replace(":", "");
-                //strStartingTime = strStartingTime.Replace("-", "");
                 strNowTimeToPrintOut = string.Format(Convert.ToDateTime(strStartingTime).Add(new System.TimeSpan(0, TimeStepToOut_MIN * intNowOrder, 0)).ToString("yyyyMMddHHmm"));
                 return strNowTimeToPrintOut;
             }
@@ -231,67 +227,4 @@ namespace gentle
             return x.CompareTo(y);
         }
     }
-
-    //public class NaturalComparer : IComparer<string>
-    //{
-    //    private int pos;
-    //    private readonly int ordr;
-
-    //    public NaturalComparer(bool Ascending = true)
-    //    {
-    //        ordr = Ascending ? 1 : -1;
-    //    }
-
-    //    private static string[] RegexSplit(string s)
-    //    {
-    //        return Regex.Split(s, @"(\d+)", RegexOptions.IgnoreCase);
-    //    }
-
-    //    private static Predicate<string> GetEmptyStrings()
-    //    {
-    //        return s => string.IsNullOrEmpty(s);
-    //    }
-
-    //    public int Compare(string x, string y)
-    //    {
-    //        List<string> left = new List<string>(RegexSplit(x));
-    //        List<string> right = new List<string>(RegexSplit(y));
-
-    //        left.RemoveAll(GetEmptyStrings());
-    //        right.RemoveAll(GetEmptyStrings());
-
-    //        pos = 0;
-    //        foreach (string e in left)
-    //        {
-    //            if (y.Count() > pos)
-    //            {
-    //                decimal ov;
-    //                if (!decimal.TryParse(x, out ov) && !decimal.TryParse(right[pos], out ov))
-    //                {
-    //                    int result = string.Compare(x, right[pos], true);
-    //                    if (result != 0)
-    //                        return result * ordr;
-    //                    else
-    //                        pos += 1;
-    //                }
-    //                else if (decimal.TryParse(x, out ov) && !decimal.TryParse(right[pos], out ov))
-    //                    return -1 * ordr;
-    //                else if (!decimal.TryParse(x, out ov) && decimal.TryParse(right[pos], out ov))
-    //                    return 1 * ordr;
-    //                else
-    //                {
-    //                    var result = decimal.Compare(decimal.Parse(x), decimal.Parse(right[pos]));
-    //                    if (result == 0)
-    //                        pos += 1;
-    //                    else
-    //                        return result * ordr;
-    //                }
-    //            }
-    //            else
-    //                return -1 * ordr;
-    //        }
-
-    //        return ordr;
-    //    }
-    //}
 }

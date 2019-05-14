@@ -327,8 +327,7 @@ namespace gentle
             }
             return lstFLselected;
         }
-
-
+        
 
         public void AddToDataTable(string[] items, string SourceFilePath, DataTable dtTarget, string NameCol1, string NameCol2, string NameCol3)
         {
@@ -387,30 +386,6 @@ namespace gentle
             return isLocked;
         }
 
-        //public static string GetAbsolutePathOneUpper(string PathToChange)
-        //{
-        //    //string outPathName = "";
-
-        //    try
-        //    {
-        //        int len = PathToChange.Length;
-        //        string p = null;
-        //        for (int n = len; n >= 1; n += -1)
-        //        {
-        //            p = PathToChange.Substring(n-1, 1);
-        //            if (p == "\\")
-        //            {
-        //                PathToChange = PathToChange.Substring(1, n - 1);
-        //                break; // TODO: might not be correct. Was : Exit For
-        //            }
-        //        }
-        //        return PathToChange.Trim();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw ex;
-        //    }
-        //}
 
         public static bool DeleteFileFriends(string sourceFPN)
         {
