@@ -136,11 +136,11 @@ namespace gentle
             return true;
         }
 
-        public static void RefreshOrderInDataTable(DataTable dt, string OrderColumeName)
+        public static void RefreshOrderInDataTable(DataTable dt, string OrderColumnName)
         {
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                dt.Rows[i][OrderColumeName] = i + 1;
+                dt.Rows[i][OrderColumnName] = i + 1;
             }
         }
 
