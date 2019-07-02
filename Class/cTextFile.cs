@@ -19,62 +19,62 @@ namespace gentle
             ALL
         };
 
-        public static bool ConfirmDeleteFiles(List<string> FilePathNames)
-        {
-            bool bAlldeleted = false;
-            int n = 0;
-            while (!(bAlldeleted == true))
-            {
-                n += 1;
-                foreach (string fpn in FilePathNames)
-                {
-                    if (File.Exists(fpn) == true)
-                    {
-                        File.Delete(fpn);
-                    }
-                }
-                foreach (string fpn in FilePathNames)
-                {
-                    if (File.Exists(fpn) == false)
-                    {
-                        bAlldeleted = true;
-                    }
-                    else
-                    {
-                        bAlldeleted = false;
-                        break; 
-                    }
-                }
-                if (n > 100)
-                    return false;
-            }
-            return true;
-        }
+        //public static bool ConfirmDeleteFiles(List<string> FilePathNames)
+        //{
+        //    bool bAlldeleted = false;
+        //    int n = 0;
+        //    while (!(bAlldeleted == true))
+        //    {
+        //        n += 1;
+        //        foreach (string fpn in FilePathNames)
+        //        {
+        //            if (File.Exists(fpn) == true)
+        //            {
+        //                File.Delete(fpn);
+        //            }
+        //        }
+        //        foreach (string fpn in FilePathNames)
+        //        {
+        //            if (File.Exists(fpn) == false)
+        //            {
+        //                bAlldeleted = true;
+        //            }
+        //            else
+        //            {
+        //                bAlldeleted = false;
+        //                break; 
+        //            }
+        //        }
+        //        if (n > 100)
+        //            return false;
+        //    }
+        //    return true;
+        //}
 
-        public static bool ConfirmDeleteFiles(string FilePathNames)
-        {
-            bool bAlldeleted = false;
-            int n = 0;
-            while (!(bAlldeleted == true))
-            {
-                n += 1;
-                if (File.Exists(FilePathNames))
-                {
-                    File.Delete(FilePathNames);
-                }
-                if (File.Exists(FilePathNames) == false)
-                {
-                    bAlldeleted = true;
-                }
-                else
-                {
-                    bAlldeleted = false;
-                }
-                if (n > 100)
-                    return false;
-            }
-            return true;
-        }
+        //public static bool ConfirmDeleteFiles(string FilePathNames)
+        //{
+        //    bool bAlldeleted = false;
+        //    int n = 0;
+        //    while (!(bAlldeleted == true))
+        //    {
+        //        n += 1;
+        //        if (File.Exists(FilePathNames))
+        //        {
+        //            File.Delete(FilePathNames);
+        //        }
+        //        if (File.Exists(FilePathNames) == false)
+        //        {
+        //            bAlldeleted = true;
+        //        }
+        //        else
+        //        {
+        //            bAlldeleted = false;
+        //        }
+        //        if (n > 100)
+        //            return false;
+        //    }
+        //    return true;
+        //}
 
         public static string MakeHeaderString(int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue)
         {
