@@ -25,6 +25,24 @@ namespace gentle
             }
         }
 
+        public static string[] SplitElementsInAlgebraicEquation(string inputString, string[] sep)
+        {
+
+            inputString = inputString.Trim();
+            string firstChar = inputString.Substring(0, 1).Trim();
+            string[] values = inputString.Split(sep, StringSplitOptions.RemoveEmptyEntries);
+            if (firstChar == "-")
+            {
+                values[0] = "-" + values[0];
+            }
+            for (int e=0;e<values.Length;e++)
+            {
+                values[e] = values[e].Trim();
+            }
+            return values;
+        }
+
+
         public static string getOperatorFromString(string inString)
         {
             //string[] operators = { ",", "(", ")", "=+", "=-", ">=+", ">=-", "<=+", "<=-", ">+", ">-", "<+", "<-", "/+", "/-", "^+", "^-", ">=", "<=", "=", ">", "<", "+", "-", "*", "/", "^" };
