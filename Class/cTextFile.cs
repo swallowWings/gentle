@@ -13,10 +13,11 @@ namespace gentle
         private const int BigSizeThreshold = 200000000;//2억개 기준
         public enum ValueSeparator
         {
-            CSV,
+            COMMA,
             SPACE,
             TAB,
-            ALL
+            ALL,
+            NONE
         };
 
         //public static bool ConfirmDeleteFiles(List<string> FilePathNames)
@@ -415,7 +416,7 @@ namespace gentle
             return values;
         }
 
-        public static SortedList<int, string[]> ReadVatFile(string sourceFPN, ValueSeparator separator = ValueSeparator.CSV)
+        public static SortedList<int, string[]> ReadVatFile(string sourceFPN, ValueSeparator separator = ValueSeparator.COMMA)
         {
             SortedList<int, string[]> values = new SortedList<int, string[]>();
             StreamReader reader = new StreamReader(sourceFPN, System.Text.Encoding.Default);
@@ -442,12 +443,12 @@ namespace gentle
             return values;
         }
         
-        private static string[] GetTextFileValueSeparator(cTextFile.ValueSeparator valueSeparator)
+        public static string[] GetTextFileValueSeparator(cTextFile.ValueSeparator valueSeparator)
         {
             string[] sepArray = null;
             switch (valueSeparator)
             {
-                case cTextFile.ValueSeparator.CSV:
+                case cTextFile.ValueSeparator.COMMA:
                     sepArray = new string[] { "," };
                     break;
                 case cTextFile.ValueSeparator.SPACE:
@@ -468,13 +469,19 @@ namespace gentle
 
 
         public static void MakeTextFileUisngTextInTextFile(string strSourceFPN, string strTagetFPN,
-            int startingLineIndex , int endingLineIndex , int colidx, bool onlyNumeric)
+            int startingLineIndex , int endingLineIndex , int[] colidxs, ValueSeparator sepSource, 
+            bool onlyNumeric, ValueSeparator  sepResult)
         {
             if (File.Exists(strTagetFPN) == true) { File.Delete(strTagetFPN); }
-            string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
+            string[] sepsSource = GetTextFileValueSeparator(sepSource);
+            string[] sepsResult = GetTextFileValueSeparator(sepResult);
             string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
             StringBuilder sb = new StringBuilder();
-            if(startingLineIndex ==-1 && endingLineIndex ==-1)
+            if(startingLineIndex ==-1 )
+            {
+                startingLineIndex = 0;
+            }
+                if(endingLineIndex ==-1)
             {
                 endingLineIndex = Lines.Length;
             }
@@ -482,22 +489,39 @@ namespace gentle
             {
                 if  (n>=startingLineIndex && n<= endingLineIndex )
                 {
-                    string[] texts = Lines[n].Split(seps, StringSplitOptions.RemoveEmptyEntries);
+                    string[] texts = Lines[n].Split(sepsSource, StringSplitOptions.RemoveEmptyEntries);
                     string v="" ;
-                    if (texts.Length > colidx)
+                    string vLine = "";
+                    for (int id = 0; id < colidxs.Length; id++)
                     {
-                        if (onlyNumeric == true)
+                        if (texts.Length >= colidxs[id])
                         {
-                            if (cComTools.IsNumeric(texts[colidx]) == true) { v = texts[colidx].Trim(); }
+                            if (onlyNumeric == true)
+                            {
+                                if (cComTools.IsNumeric(texts[colidxs[id]]) == true) { v = texts[colidxs[id]].Trim(); }
+                            }
+                            else
+                            {
+                                v = texts[colidxs[id]].Trim();
+                            }
+                        }
+                        if (v.Length>0 && v.Substring(v.Length - 1, 1) == sepsResult[0])
+                        {
+                            v = v.Substring(0, v.Length - 1);
+                        }
+
+                        if (vLine.Trim() == "")
+                        {
+                            vLine = v;
                         }
                         else
                         {
-                            v = texts[colidx].Trim();
+                            vLine = vLine + sepsResult[0] + v;
                         }
                     }
-                    if (v!="")
+                    if (vLine != "")
                     {
-                        sb.Append(v + "\r\n");
+                        sb.Append(vLine + "\r\n");
                     }
                 }
                 if (n==endingLineIndex )
@@ -509,10 +533,12 @@ namespace gentle
         }
 
         public static void MakeTextFileUisngTextInTextFile(string strSourceFPN, string strTagetFPN, 
-          string startingText, string endingText, int colidx, bool onlyNumeric)
+          string startingText, string endingText, int[] colidxs, ValueSeparator sepSource,
+          bool onlyNumeric, ValueSeparator sepResult)
         {
             if (File.Exists(strTagetFPN) == true) { File.Delete(strTagetFPN); }
-            string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
+            string[] seps = GetTextFileValueSeparator(sepSource);
+            string[] sepsResult = GetTextFileValueSeparator(sepResult);
             string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
             StringBuilder sb = new StringBuilder();
             bool started = false;
@@ -529,20 +555,36 @@ namespace gentle
                 {
                     string[] texts = Lines[n].Split(seps, StringSplitOptions.RemoveEmptyEntries);
                     string v="";
-                    if (texts.Length >colidx)
+                    string vLine = "";
+                    for (int id = 0; id < colidxs.Length; id++)
                     {
-                        if (onlyNumeric == true)
+                        if (texts.Length > id)
                         {
-                            if (cComTools.IsNumeric(texts[colidx]) == true)  { v = texts[colidx].Trim(); }
+                            if (onlyNumeric == true)
+                            {
+                                if (cComTools.IsNumeric(texts[colidxs[id]]) == true) { v = texts[colidxs[id]].Trim(); }
+                            }
+                            else
+                            {
+                                v = texts[colidxs[id]].Trim();
+                            }
+                        }
+                        if (v.Substring(v.Length - 1, 1) == sepsResult[0])
+                        {
+                            v = v.Substring(0, v.Length - 1);
+                        }
+                        if (vLine.Trim() == "")
+                        {
+                            vLine = v;
                         }
                         else
                         {
-                            v = texts[colidx].Trim();
+                            vLine = vLine + sepsResult[0] + v;
                         }
-                    }
-                    if (v != "")
+                    }                        
+                    if (vLine != "")
                     {
-                        sb.Append(v + "\r\n");
+                        sb.Append(vLine + "\r\n");
                     }
                 }
                 if (started==true && endingConditionApplied == true && Lines[n].Contains(endingText))
