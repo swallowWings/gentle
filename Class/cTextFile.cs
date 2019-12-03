@@ -77,14 +77,22 @@ namespace gentle
         //    return true;
         //}
 
-        public static string MakeHeaderString(int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue)
+        public static string MakeHeaderString(int ncols, int nrows, double xll, double yll, double cellSize, double dx, double dy, string nodataValue)
         {
             string header = "";
             header = header + "ncols" + " " + Convert.ToString(ncols) + "\r\n";
             header = header + "nrows" + " " + Convert.ToString(nrows) + "\r\n";
             header = header + "xllcorner" + " " + Convert.ToString(xll) + "\r\n";
             header = header + "yllcorner" + " " + Convert.ToString(yll) + "\r\n";
-            header = header + "cellsize" + " " + Convert.ToString(cellSize) + "\r\n";
+            if (dx!=dy && dx>0 && dy>0)
+            {
+                header = header + "dx" + " " + Convert.ToString(dx) + "\r\n";
+                header = header + "dy" + " " + Convert.ToString(dy) + "\r\n";
+            }
+            else
+            {
+                header = header + "cellsize" + " " + Convert.ToString(cellSize) + "\r\n";
+            }            
             header = header + "NODATA_value" + " " + nodataValue + "\r\n";
             return header;
         }
@@ -92,7 +100,7 @@ namespace gentle
         public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue, string[] rowsArray)
         {
             if (File.Exists(fpn) == true) { File.Delete(fpn); }
-            string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
+            string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, 0,0, nodataValue);
             File.AppendAllText(fpn, header);
             for (int n = 0; n < rowsArray.Length; n++)
             {
@@ -121,7 +129,7 @@ namespace gentle
         public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, int nodataValue, double[,] array, int decimalPartN)
         {
             if (File.Exists(fpn) == true) { File.Delete(fpn); }
-            string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue.ToString());
+            string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, 0,0, nodataValue.ToString());
             File.AppendAllText(fpn, header);
             WriteTwoDimData(fpn, array, decimalPartN, nodataValue);
             return true;

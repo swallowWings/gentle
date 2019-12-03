@@ -13,6 +13,8 @@ namespace gentle
         public double xllcorner;
         public double yllcorner;
         public double cellsize;
+        public double dx;
+        public double dy;
         public int nodataValue;
         public int headerEndingLineIndex;
         public int dataStartingLineIndex;
@@ -30,9 +32,23 @@ namespace gentle
         public cRasterExtent(cAscRasterHeader header)
         {
             bottom = header.yllcorner;
-            top = header.yllcorner + header.numberRows * header.cellsize;
+            if (header.cellsize>0)
+            {
+                top = header.yllcorner + header.numberRows * header.cellsize;
+            }
+            else
+            {
+                top = header.yllcorner + header.numberRows * header.dy;
+            }
             left= header.xllcorner;
-            right = header.xllcorner + header.numberCols * header.cellsize;
+            if (header.cellsize > 0)
+            {
+                right = header.xllcorner + header.numberCols * header.cellsize;
+            }
+            else
+            {
+                right = header.xllcorner + header.numberCols * header.dx;
+            }
             extentWidth = right - left;
             extentHeight = top - bottom;
         }

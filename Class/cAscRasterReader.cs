@@ -37,7 +37,7 @@ namespace gentle
             }
            mHeader = GetHeaderInfo(mLinesForHeader, mSeparator);
             mHeaderStringAll = cTextFile.MakeHeaderString(mHeader.numberCols, mHeader.numberRows,
-                            mHeader.xllcorner, mHeader.yllcorner, mHeader.cellsize, mHeader.nodataValue.ToString());
+                            mHeader.xllcorner, mHeader.yllcorner, mHeader.cellsize, mHeader.dx, mHeader.dy, mHeader.nodataValue.ToString());
             extent = new cRasterExtent(mHeader);
             mValuesFromTL = new double[mHeader.numberCols, mHeader.numberRows ];
             int headerEndingIndex =mHeader .headerEndingLineIndex;
@@ -184,9 +184,27 @@ namespace gentle
                         }
                         break;
                     case 4:
-                        if (double.TryParse(LineParts[1], out dv))
+                        if (LineParts[0].ToLower() == "dx")
                         {
-                            header.cellsize = dv;
+                            if (double.TryParse(LineParts[1], out dv))
+                            {
+                                header.dx = dv;
+                            }
+                            else
+                            {
+                                header.dx = -1;
+                            }
+                        }
+                        else if (LineParts[0].ToLower() == "cellsize")
+                        {
+                            if (double.TryParse(LineParts[1], out dv))
+                            {
+                                header.cellsize = dv;
+                            }
+                            else
+                            {
+                                header.cellsize = -1;
+                            }
                         }
                         else
                         {
@@ -194,20 +212,62 @@ namespace gentle
                         }
                         break;
                     case 5:
-                        if (string.IsNullOrEmpty(LineParts[1]))
+                        if (LineParts[0].ToLower() == "nodata_value")
                         {
-                            header.nodataValue = -9999;
-                        }
-                        else
-                        {
-                            if (double.TryParse(LineParts[1], out double v))
+                            if (string.IsNullOrEmpty(LineParts[1]))
                             {
-                                header.nodataValue = (int) v;
+                                header.nodataValue = -9999;
                             }
                             else
                             {
-                                header.nodataValue = -1;
+                                if (double.TryParse(LineParts[1], out double v))
+                                {
+                                    header.nodataValue = (int)v;
+                                }
+                                else
+                                {
+                                    header.nodataValue = -9999;
+                                }
                             }
+                        }
+                        else if (LineParts[0].ToLower() == "dy")
+                        {
+                            if (double.TryParse(LineParts[1], out dv))
+                            {
+                                header.dy = dv;
+                            }
+                            else
+                            {
+                                header.dy = -1;
+                            }
+                        }
+                        else
+                        {
+                            header.nodataValue = -9999;
+                        }
+                        break;
+                    case 6:
+                        if (LineParts[0].ToLower() == "nodata_value")
+                        {
+                            if (string.IsNullOrEmpty(LineParts[1]))
+                            {
+                                header.nodataValue = -9999;
+                            }
+                            else
+                            {
+                                if (double.TryParse(LineParts[1], out double v))
+                                {
+                                    header.nodataValue = (int)v;
+                                }
+                                else
+                                {
+                                    header.nodataValue = -9999;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            header.nodataValue = -9999;
                         }
                         break;
                 }
