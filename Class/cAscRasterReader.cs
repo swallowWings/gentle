@@ -378,19 +378,27 @@ namespace gentle
         }
 
 
-        public static double CellsAverageValue(CellPosition[] targetCells, cAscRasterReader inASC, bool allowNegative)
+        public static double CellsAverageValue(CellPosition[] targetCells, cAscRasterReader inASC)
         {
             double sum = 0;
+            int cellCount_notNull = 0;
             for (int n = 0; n < targetCells.Length; n++)
             {
                 double v = inASC.mValuesFromTL[targetCells[n].x, targetCells[n].y];
-                if (allowNegative == false && v < 0)
+                if (v != inASC.Header .nodataValue )
                 {
-                    v = 0;
+                    sum += v;
+                    cellCount_notNull++;
                 }
-                sum += v;
             }
-            return sum / targetCells.Length;
+            if (cellCount_notNull >0)
+            {
+                return sum / (double) cellCount_notNull;
+            }
+            else
+            {
+                return 0;
+            }            
         }
 
 
