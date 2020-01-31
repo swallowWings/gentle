@@ -25,9 +25,15 @@ namespace gentle
         private const int BigSizeThreshold = 200000000;//2억개 기준
 
 
+        private  double mValue_max = double.MinValue;
+        private double mValue_min = double.MaxValue;
+        private double mValue_sum = 0.0;
+        private double mValue_ave = 0.0;
+        private int mCellCount_notNull = 0;
+
         public cAscRasterReader(string FPN)
         {
-            mLinesForHeader = new string[8];
+             mLinesForHeader = new string[8];
             int r = 0;
             foreach (string line in File.ReadLines(FPN))
             {
@@ -43,6 +49,7 @@ namespace gentle
             int headerEndingIndex =mHeader .headerEndingLineIndex;
             bool isBigSize = false;
             if(mHeader.numberCols * mHeader.numberRows > BigSizeThreshold) { isBigSize = true; }
+            mCellCount_notNull = 0;
             if (isBigSize == false)
             {
                 string[] allLines = File.ReadAllLines(FPN, Encoding.Default);
@@ -61,6 +68,19 @@ namespace gentle
                           else
                           {
                               mValuesFromTL[x, y] = Header.nodataValue;
+                          }
+                          if (mValuesFromTL[x, y] != Header.nodataValue)
+                          {
+                              mCellCount_notNull++;
+                              mValue_sum = mValue_sum + mValuesFromTL[x, y];
+                              if(mValuesFromTL[x, y]>mValue_max)
+                              {
+                                  mValue_max = mValuesFromTL[x, y];
+                              }
+                              if (mValuesFromTL[x, y] < mValue_min)
+                              {
+                                  mValue_min = mValuesFromTL[x, y];
+                              }
                           }
                       }
                   });
@@ -84,6 +104,19 @@ namespace gentle
                             else
                             {
                                 mValuesFromTL[x, y] = Header.nodataValue;
+                            }
+                            if (mValuesFromTL[x, y] != Header.nodataValue)
+                            {
+                                mCellCount_notNull++;
+                                mValue_sum = mValue_sum + mValuesFromTL[x, y];
+                                if (mValuesFromTL[x, y] > mValue_max)
+                                {
+                                    mValue_max = mValuesFromTL[x, y];
+                                }
+                                if (mValuesFromTL[x, y] < mValue_min)
+                                {
+                                    mValue_min = mValuesFromTL[x, y];
+                                }
                             }
                         }
                         y++;
@@ -350,7 +383,7 @@ namespace gentle
             double sum = 0;
             for (int n = 0; n < targetCells.Length; n++)
             {
-                double v = inASC .mValuesFromTL [targetCells[n].x, targetCells[n].y];
+                double v = inASC.mValuesFromTL[targetCells[n].x, targetCells[n].y];
                 if (allowNegative == false && v < 0)
                 {
                     v = 0;
@@ -447,7 +480,47 @@ namespace gentle
         {
             get
             {
-                return mHeader .dataStartingLineIndex;
+                return mHeader.dataStartingLineIndex;
+            }
+        }
+
+        public double value_max
+        {
+            get
+            {
+                return mValue_max;
+            }
+        }
+
+        public double value_min
+        {
+            get
+            {
+                return mValue_min;
+            }
+        }
+
+        public double value_sum
+        {
+            get
+            {
+                return mValue_sum;
+            }
+        }
+
+        public double value_ave
+        {
+            get
+            {
+                return mValue_sum / mCellCount_notNull;
+            }
+        }
+
+        public int cellCount_notNull
+        {
+            get
+            {
+                return mCellCount_notNull;
             }
         }
 
