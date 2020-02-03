@@ -18,6 +18,15 @@ namespace gentle
             None
         };
 
+        public enum StatisticsType
+        {
+            Average,
+            Maximum,
+            Minimum,
+            Sum
+        };
+
+
         public static cData.DataType GetDataTypeByName(string inType)
         {
             foreach (DataType dtype in Enum.GetValues(typeof(cData.DataType)))

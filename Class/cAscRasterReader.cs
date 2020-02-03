@@ -53,37 +53,39 @@ namespace gentle
             if (isBigSize == false)
             {
                 string[] allLines = File.ReadAllLines(FPN, Encoding.Default);
-                var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-                Parallel.For(headerEndingIndex + 1, allLines.Length, options, delegate (int ly)
-                  {
-                      string[] values = allLines[ly].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-                      int y = ly - headerEndingIndex - 1;
-                      for (int x = 0; x < values.Length; x++)
-                      {
-                          double v = 0;
-                          if (double.TryParse(values[x], out v) == true)
-                          {
-                              mValuesFromTL[x, y] = v;
-                          }
-                          else
-                          {
-                              mValuesFromTL[x, y] = Header.nodataValue;
-                          }
-                          if (mValuesFromTL[x, y] != Header.nodataValue)
-                          {
-                              mCellCount_notNull++;
-                              mValue_sum = mValue_sum + mValuesFromTL[x, y];
-                              if(mValuesFromTL[x, y]>mValue_max)
-                              {
-                                  mValue_max = mValuesFromTL[x, y];
-                              }
-                              if (mValuesFromTL[x, y] < mValue_min)
-                              {
-                                  mValue_min = mValuesFromTL[x, y];
-                              }
-                          }
-                      }
-                  });
+                //var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+                //Parallel.For(headerEndingIndex + 1, allLines.Length, options, delegate (int ly)
+                for (int ly = headerEndingIndex + 1; ly < allLines.Length; ly++)
+                {
+                    string[] values = allLines[ly].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
+                    int y = ly - headerEndingIndex - 1;
+                    for (int x = 0; x < values.Length; x++)
+                    {
+                        double v = 0;
+                        if (double.TryParse(values[x], out v) == true)
+                        {
+                            mValuesFromTL[x, y] = v;
+                        }
+                        else
+                        {
+                            mValuesFromTL[x, y] = Header.nodataValue;
+                        }
+                        if (mValuesFromTL[x, y] != Header.nodataValue)
+                        {
+                            mCellCount_notNull++;
+                            mValue_sum = mValue_sum + mValuesFromTL[x, y];
+                            if (mValuesFromTL[x, y] > mValue_max)
+                            {
+                                mValue_max = mValuesFromTL[x, y];
+                            }
+                            if (mValuesFromTL[x, y] < mValue_min)
+                            {
+                                mValue_min = mValuesFromTL[x, y];
+                            }
+                        }
+                    }
+                }
+                //);
             }
             else
             {
@@ -378,27 +380,49 @@ namespace gentle
         }
 
 
-        public static double CellsAverageValue(CellPosition[] targetCells, cAscRasterReader inASC)
+        public static double StatisticValueInSomeCells(cAscRasterReader inASC, CellPosition[] targetCells, cData.StatisticsType sType)
         {
-            double sum = 0;
+            double sum = 0.0;
+            double min = double.MaxValue;
+            double max = double.MinValue;
             int cellCount_notNull = 0;
             for (int n = 0; n < targetCells.Length; n++)
             {
                 double v = inASC.mValuesFromTL[targetCells[n].x, targetCells[n].y];
-                if (v != inASC.Header .nodataValue )
+                if (v != inASC.Header.nodataValue)
                 {
+                    if (min > v)
+                    {
+                        min = v;
+                    }
+                    if (max < v)
+                    {
+                        max = v;
+                    }
                     sum += v;
                     cellCount_notNull++;
                 }
             }
-            if (cellCount_notNull >0)
+            if (cellCount_notNull > 0)
             {
-                return sum / (double) cellCount_notNull;
+                switch (sType)
+                {
+                    case cData.StatisticsType.Average:
+                        return sum / (double)cellCount_notNull;
+                    case cData.StatisticsType.Maximum:
+                        return max;
+                    case cData.StatisticsType.Minimum:
+                        return min;
+                    case cData.StatisticsType.Sum:
+                        return sum;
+                    default:
+                        return 0;
+                }
             }
             else
             {
                 return 0;
-            }            
+            }
         }
 
 

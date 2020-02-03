@@ -331,7 +331,7 @@ namespace gentle
 
         public void AddToDataTable(string[] items, string SourceFilePath, DataTable dtTarget, string NameCol1, string NameCol2, string NameCol3)
         {
-            Array.Sort(items);
+            //Array.Sort(items);
             int intFileCount = 0;
             int intRecordCountOri = 0;
             intFileCount = items.Length;
