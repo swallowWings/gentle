@@ -187,8 +187,13 @@ public:
 	//double dataValueOri;
 	ascRasterHeader header;
 	string headerStringAll;
-	double ** valuesFromTL;
+	double** valuesFromTL;
 	ascRasterExtent extent;
+	double value_max = DBL_MIN;
+	double value_min = DBL_MAX;
+	double value_sum = 0.0;
+	int cellCount_notNull = 0;
+	double value_ave = 0.0;
 
 	ascRasterFile(string fpn_ascRasterFile);
 	ascRasterHeader getAscRasterHeader(string LinesForHeader[], char separator);

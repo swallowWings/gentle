@@ -67,7 +67,7 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 		//int rcountMax = header.nRows + header.headerEndingLineIndex+1;
 		vector<string> allLinesv = readTextFileToStringVector(fpn_ascRasterFile);
 		int lyMax = (int)allLinesv.size();
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
 			vector<string> values = splitToStringVector(allLinesv[ly], ' ');
 			int y = ly - dataStaringIndex;
@@ -78,6 +78,19 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 				}
 				else {
 					valuesFromTL[x][y] = header.nodataValue;
+				}
+				if (valuesFromTL[x][y] != header.nodataValue)
+				{
+					cellCount_notNull++;
+					value_sum = value_sum + valuesFromTL[x][y];
+					if (valuesFromTL[x][y] > value_max)
+					{
+						value_max = valuesFromTL[x][y];
+					}
+					if (valuesFromTL[x][y] < value_min)
+					{
+						value_min = valuesFromTL[x][y];
+					}
 				}
 			}
 		}
@@ -98,11 +111,27 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 					else {
 						valuesFromTL[x][y] = header.nodataValue;
 					}
+					if (valuesFromTL[x][y] != header.nodataValue)
+					{
+						cellCount_notNull++;
+						value_sum = value_sum + valuesFromTL[x][y];
+						if (valuesFromTL[x][y] > value_max)
+						{
+							value_max = valuesFromTL[x][y];
+						}
+						if (valuesFromTL[x][y] < value_min)
+						{
+							value_min = valuesFromTL[x][y];
+						}
+					}
 				}
 				y++;
 			}
 			nl++;
 		}
+	}
+	if (cellCount_notNull > 0) {
+		value_ave = value_sum / cellCount_notNull;
 	}
 }
 

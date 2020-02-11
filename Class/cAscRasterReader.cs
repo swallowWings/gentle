@@ -360,13 +360,13 @@ namespace gentle
             return true;
         }
 
-        public static CellPosition[] GetPositiveCellsPositions(cAscRasterReader inGrid)
+        public static CellPosition[] GetPositiveCellsPositionsInASCfile(cAscRasterReader inGrid)
         {
             List<CellPosition> cells = new List<CellPosition>();
             for (int y = 0; y < inGrid.Header.numberRows; y++)
             {
                 for (int x = 0; x < inGrid.Header.numberCols; x++)
-                {
+                { 
                     if (inGrid.ValueFromTL(x, y) > 0)
                     {
                         CellPosition cp;
