@@ -26,8 +26,6 @@
 	#include <unistd.h>
 #endif
 
-//#include "gentle_function.h"
-
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -60,14 +58,13 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 		valuesFromTL[i] = new double[header.nRows];
 	}
 	bool isBigSize = false;
-	if (header.nCols * header.nRows > BigSizeThreshold) { isBigSize = true; }
+	if (header.nCols * header.nRows > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = true; }
 	int headerEndingIndex = header.headerEndingLineIndex;
 	int dataStaringIndex = header.dataStartingLineIndex;
 	if (isBigSize == false) {
 		//int rcountMax = header.nRows + header.headerEndingLineIndex+1;
 		vector<string> allLinesv = readTextFileToStringVector(fpn_ascRasterFile);
 		int lyMax = (int)allLinesv.size();
-//#pragma omp parallel for
 		for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
 			vector<string> values = splitToStringVector(allLinesv[ly], ' ');
 			int y = ly - dataStaringIndex;
@@ -239,15 +236,15 @@ ascRasterExtent ascRasterFile::getAscRasterExtent(ascRasterHeader header)
 {
 	ascRasterExtent ext;
 	ext.bottom = header.yllcorner;
-	ext.top = header.yllcorner + (double) header.nRows * header.cellsize;
+	ext.top = header.yllcorner +  header.nRows * header.cellsize;
 	ext.left = header.xllcorner;
-	ext.right = header.xllcorner + (double) header.nCols * header.cellsize;
+	ext.right = header.xllcorner +  header.nCols * header.cellsize;
 	ext.extentWidth = ext.right - ext.left;
 	ext.extentHeight = ext.top - ext.bottom;
 	return ext;
 }
 
-string ascRasterFile::makeHeaderString(int ncols, int nrows, double xll, double yll, float cellSize, float dx, float dy, int nodataValue)
+string ascRasterFile::makeHeaderString(int ncols, int nrows, double xll, double yll, double cellSize, double dx, double dy, int nodataValue)
 {
 	string headerall = "";
 	headerall =  "ncols " + to_string(ncols) + "\n";
@@ -265,7 +262,7 @@ string ascRasterFile::makeHeaderString(int ncols, int nrows, double xll, double 
 		headerall = headerall + "cellsize " + to_string(cellSize) + "\n";
 	}
 	
-	headerall = headerall + "NODATA_value " + to_string(nodataValue) + "\n";
+	headerall = headerall + "NODATA_value " + to_string(nodataValue);
 	return headerall;
 }
 
@@ -278,28 +275,21 @@ void appendTextToTextFile(string fpn, string textToAppend)
 }
 int confirmDeleteFiles(vector<string> filePathNames)
 {
-	bool bAlldeleted  = false;
+	bool bAlldeleted = false;
 	int n = 0;
-	while (!(bAlldeleted == true))
-	{
+	while (!(bAlldeleted == true)) {
 		n += 1;
-		for (string fpn : filePathNames)
-		{
-			if (fs::exists(fpn) == true)
-			{
-				
+		for (string fpn : filePathNames) {
+			if (fs::exists(fpn) == true) {
 				std::remove(fpn.c_str());
 			}
 		}
-		for (string fpn : filePathNames)
-		{
-			if (fs::exists(fpn) == false)
-			{
+		for (string fpn : filePathNames) {
+			if (fs::exists(fpn) == false) {
 				bAlldeleted = true;
 				break;
 			}
-			else
-			{
+			else {
 				bAlldeleted = false;
 				break;
 			}
@@ -316,17 +306,14 @@ int confirmDeleteFile(string filePathNames)
 	while (!(bAlldeleted == true))
 	{
 		n += 1;
-		if (fs::exists(filePathNames) == true)
-		{
+		if (fs::exists(filePathNames) == true) {
 			std::remove(filePathNames.c_str());
 		}
-		if (fs::exists(filePathNames) == false)
-		{
+		if (fs::exists(filePathNames) == false) {
 			bAlldeleted = true;
 			break;
 		}
-		else
-		{
+		else {
 			bAlldeleted = false;
 			break;
 		}
@@ -403,23 +390,19 @@ version getCurrentFileVersion()
 	char* buffer = NULL;
 	buffer = new char[infoSize];
 
-	if (buffer)
-	{
+	if (buffer) {
 		// 버전정보데이터를 가져옵니다.
-		if (GetFileVersionInfo(fpn_exe, 0, infoSize, buffer) != 0)
-		{
+		if (GetFileVersionInfo(fpn_exe, 0, infoSize, buffer) != 0) {
 			VS_FIXEDFILEINFO* pFineInfo = NULL;
 			UINT bufLen = 0;
 			// buffer로 부터 VS_FIXEDFILEINFO 정보를 가져옵니다.
-			if (VerQueryValue(buffer, "\\", (LPVOID*)&pFineInfo, &bufLen) != 0)
-			{
+			if (VerQueryValue(buffer, "\\", (LPVOID*)&pFineInfo, &bufLen) != 0) {
 				ver.major = HIWORD(pFineInfo->dwFileVersionMS);
 				ver.minor = LOWORD(pFineInfo->dwFileVersionMS);
 				ver.build = HIWORD(pFineInfo->dwFileVersionLS);
 				//ver.LastWrittenTime = new char[30];
 				struct _stat buf;
-				if (_stat(fpn_exe, &buf) != 0)
-				{
+				if (_stat(fpn_exe, &buf) != 0) {
 					switch (errno) {
 					case ENOENT:
 						fprintf(stderr, "File %s not found.\n", fpn_exe);
@@ -430,8 +413,7 @@ version getCurrentFileVersion()
 					}
 					sprintf_s(ver.LastWrittenTime, "");
 				}
-				else
-				{
+				else {
 					//printf("%s\n", fpn_exe);
 					//printf("\tTime Creation     : %s\n", timeToString(localtime(&buf.st_ctime)));
 					//printf("\tTime Last Written : %s\n", timeToString(localtime(&buf.st_mtime)));
@@ -488,17 +470,15 @@ string getValueStringFromXmlLine(string aLine, string fieldName)
 {
 	int len_fiedlName = 0;
 	int pos1 = 0;
-	string strToFind = "<"+ fieldName+">";
-	pos1 =(int)  aLine.find(strToFind, 0);
-	if (pos1 >= 0)
-	{
+	string strToFind = "<" + fieldName + ">";
+	pos1 = (int)aLine.find(strToFind, 0);
+	if (pos1 >= 0) {
 		//pos1 = aLine.find("<DEMFile>", 0);
-		len_fiedlName = (int) strToFind.length();
+		len_fiedlName = (int)strToFind.length();
 		int pos2 = 0;
 		string strToFind2 = "</" + fieldName + ">";
 		pos2 = (int)aLine.find(strToFind2);
-		if (pos2 >= 0)
-		{
+		if (pos2 >= 0) {
 			string valueString = "";
 			int valueSize = 0;
 			valueSize = pos2 - pos1 - len_fiedlName;
@@ -507,11 +487,9 @@ string getValueStringFromXmlLine(string aLine, string fieldName)
 		}
 		return "";
 	}
-	else
-	{
+	else {
 		return "";
 	}
-
 }
 
 void makeASCTextFile(string fpn, string allHeader, double** array2D,
@@ -542,17 +520,29 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 	img.clear();
 	image_drawer draw(img);
 	if (rt == rendererType::Depth) {
-#pragma omp parallel for 
+		//#pragma omp parallel for 
 		for (int y = 0; y < img.height(); ++y) {
 			for (int x = 0; x < img.width(); ++x) {
 				double av = array2D[x][y];
-				if (av > rendererMaxV) {
-					av = rendererMaxV;
-				}
-				if (av < 0) {
+				if (av == nodataV) {
 					av = 0;
 				}
-				int v = 490 + (int)(av / rendererMaxV * 510.0);// hsv_colormap 에서 490부터 사용한다.
+				else {
+					if (av > rendererMaxV) {
+						av = rendererMaxV;
+					}
+					if (av < 0) {
+						av = 0;
+					}
+				}
+
+				int v = 0;				
+				if (av == 0) {
+					v = 1 20;
+				}
+				else {
+					v = 490 + (int)(av / rendererMaxV * 510.0);// hsv_colormap 에서 490부터 사용한다.
+				}				
 				rgb_t col = hsv_colormap[v];
 				img.set_pixel(x, y, col.red, col.green, col.blue);
 			}
@@ -726,7 +716,7 @@ vector<double> splitToDoubleVector(string stringToBeSplitted, char delimeter, bo
 vector<float> splitToFloatVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry)
 {
 	stringstream ss(stringToBeSplitted);
-	float v;
+	double v;
 	string item;
 	//char * seprator = delimeter.c_str();
 	vector<float> splittedValues;
@@ -1168,17 +1158,17 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 	int nx = arrayLength_x;
 	int ny = arrayLength_y;
 	int isBigSize = -1;
-	int BigSizeThreshold = 200000000; //2억개 기준
-	if (nx * ny > BigSizeThreshold) { isBigSize = 1; }
+	//int BigSizeThreshold = 200000000; //2억개 기준
+	if (nx * ny > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
 
 	fs::path fpn_out = fs::path(fpn);
 	std::ofstream outfile;
-	if (fs::exists(fpn_out) == false) {
-		outfile.open(fpn_out, ios::out);
-	}
-	else if (fs::exists(fpn_out) == true) {
-		outfile.open(fpn_out, ios::app);
-	}
+	//if (fs::exists(fpn_out) == false) {
+	//	outfile.open(fpn_out, ios::out);
+	//}
+	//else if (fs::exists(fpn_out) == true) {
+	outfile.open(fpn_out, ios::app);
+	//}
 	if (isBigSize == -1) {
 		string strALL = "";
 		for (int nr = 0; nr < ny; nr++) {

@@ -12,6 +12,8 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+const int CONST_BIG_SIZE_ARRAY_THRESHOLD = 200000000;
+
 typedef struct _ascRasterExtent
 {
 	double bottom=0.0;
@@ -28,9 +30,9 @@ typedef struct _ascRasterHeader
 	int nRows = 0;
 	double xllcorner = 0.0;
 	double yllcorner = 0.0;
-	float dx = 0.0;
-	float dy = 0.0;
-	float cellsize = 0.0;
+	double dx = 0.0;
+	double dy = 0.0;
+	double cellsize = 0.0;
 	int nodataValue = 0;
 	int headerEndingLineIndex = 0;
 	int dataStartingLineIndex = 0;
@@ -176,7 +178,7 @@ class ascRasterFile
 {
 
 private:
-	const int BigSizeThreshold = 200000000;//2억개 기준
+	//const int BigSizeThreshold = 200000000;//2억개 기준
 	char separator = { ' ' };
 
 public:
@@ -198,7 +200,7 @@ public:
 	ascRasterFile(string fpn_ascRasterFile);
 	ascRasterHeader getAscRasterHeader(string LinesForHeader[], char separator);
 	ascRasterExtent getAscRasterExtent(ascRasterHeader header);
-	string makeHeaderString(int ncols, int nrows, double xll, double yll, float cellSize, float dx, float dy, int nodataValue);
+	string makeHeaderString(int ncols, int nrows, double xll, double yll, double cellSize, double dx, double dy, int nodataValue);
 
 	~ascRasterFile();
 };

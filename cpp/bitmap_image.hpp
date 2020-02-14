@@ -205,6 +205,18 @@ public:
       data_[offset + 2] = red;
    }
 
+   inline void set_pixel_transparent(const unsigned int x, const unsigned int y)
+   {
+       const unsigned int y_offset = y * row_increment_;
+       const unsigned int x_offset = x * bytes_per_pixel_;
+       const unsigned int offset = y_offset + x_offset;
+
+       data_[offset + 0] = 255;
+       data_[offset + 1] = 255;
+       data_[offset + 2] = 255;
+   }
+
+
    template <typename RGB>
    inline void set_pixel(const unsigned int x, const unsigned int y, const RGB& colour)
    {
@@ -3145,6 +3157,7 @@ inline void sobel_operator(const bitmap_image& src_image,
    dst_image.import_gray_scale_clamped(&im1(0,0));
 }
 
+const rgb_t transparent_color = { 255,255,255 };
 enum palette_name
 {
    e_red,           e_scarlet,      e_vermilion,        e_tangelo,         e_orange,
@@ -3158,6 +3171,7 @@ enum palette_name
    e_magenta,       e_orchid,       e_fuchsia,          e_cerise,          e_rose,
    e_raspberry,     e_crimson,      e_amaranth,         e_white,           e_black
 };
+
 
 const rgb_t palette_colormap[] = {
    {255,   0,   0}, {255,  31,   0}, {255,  63,   0}, {255,  95,   0}, {255, 127,   0},
