@@ -1143,12 +1143,10 @@ bool writeLog(fs::path fpn, string printText, int bprintFile, int bprintConsole)
 	if (bprintFile > 0)
 	{
 		std::ofstream outfile;
-		if (fs::exists(fpn) == false)
-		{
+		if (fs::exists(fpn) == false) {
 			outfile.open(fpn, ios::out);
 		}
-		else if (fs::exists(fpn) == true)
-		{
+		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
 		time_t now = time(0);
@@ -1183,8 +1181,7 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 		string strALL = "";
 		for (int nr = 0; nr < ny; nr++) {
 			for (int nc = 0; nc < nx; nc++) {
-				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue)
-				{
+				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
 					string aStr = forString(array2D[nc][nr], 0);
 					aStr += " ";
 					strALL += aStr;
