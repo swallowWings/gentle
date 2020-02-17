@@ -3157,7 +3157,6 @@ inline void sobel_operator(const bitmap_image& src_image,
    dst_image.import_gray_scale_clamped(&im1(0,0));
 }
 
-const rgb_t transparent_color = { 255,255,255 };
 enum palette_name
 {
    e_red,           e_scarlet,      e_vermilion,        e_tangelo,         e_orange,

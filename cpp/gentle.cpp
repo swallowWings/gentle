@@ -520,7 +520,7 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 	img.clear();
 	image_drawer draw(img);
 	if (rt == rendererType::Depth) {
-		//#pragma omp parallel for 
+#pragma omp parallel for 
 		for (int y = 0; y < img.height(); ++y) {
 			for (int x = 0; x < img.width(); ++x) {
 				double av = array2D[x][y];
@@ -535,15 +535,14 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 						av = 0;
 					}
 				}
-
-				int v = 0;				
+				rgb_t col;
 				if (av == 0) {
-					v = 1 20;
+					col = { 255, 217, 170 };
 				}
 				else {
-					v = 490 + (int)(av / rendererMaxV * 510.0);// hsv_colormap 에서 490부터 사용한다.
-				}				
-				rgb_t col = hsv_colormap[v];
+					int v = 490 + (int)(av / rendererMaxV * 510.0);// hsv_colormap 에서 490부터 사용한다.
+					col = hsv_colormap[v];
+				}
 				img.set_pixel(x, y, col.red, col.green, col.blue);
 			}
 		}
@@ -553,14 +552,25 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 		for (int y = 0; y < img.height(); ++y) {
 			for (int x = 0; x < img.width(); ++x) {
 				double av = array2D[x][y];
-				if (av > rendererMaxV) {
-					av = rendererMaxV;
-				}
-				if (av < 0) {
+				if (av == nodataV) {
 					av = 0;
 				}
-				int v = (int)(av / rendererMaxV) * 1000.0;
-				rgb_t col = jet_colormap[v];
+				else {
+					if (av > rendererMaxV) {
+						av = rendererMaxV;
+					}
+					if (av < 0) {
+						av = 0;
+					}
+				}
+				rgb_t col;
+				if (av == 0) {
+					col = { 255, 255, 255 };
+				}
+				else {
+					int v = (int)(av / rendererMaxV) * 1000.0;
+					col = jet_colormap[v];
+				}
 				img.set_pixel(x, y, col.red, col.green, col.blue);
 			}
 		}
