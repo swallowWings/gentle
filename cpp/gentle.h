@@ -158,7 +158,7 @@ vector<string> splitToStringVector(string stringToBeSplitted, char delimeter, bo
 
 char* stringToCharP(string c_charP);
 string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int elaspedTimeSec);
-char* timeToString__yyyymmdd_HHcolonMMcolonSS(struct tm* t, int includeSEC = -1);
+char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC = -1);
 string timeToString_yyyymmdd_HHclnMMclnSS(struct tm t, int includeSEC = -1);
 string timeToString_yyyymmdd_HHclnMMclnSS(COleDateTime t, int includeSEC);
 string toLower(string instring);

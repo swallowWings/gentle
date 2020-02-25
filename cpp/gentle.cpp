@@ -11,11 +11,14 @@
 #include<ATLComTime.h>
 #include <filesystem>
 #include <algorithm>
+
 #include "cpuinfodelegate.h"
 #include "gpuinfodelegate.h"
 #include "bitmap_image.hpp"
 
 #include "gentle.h"
+
+//#pragma comment(lib,"version.lib")
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -382,7 +385,7 @@ version getCurrentFileVersion()
 	DWORD infoSize = 0;
 	version ver;
 
-	// 파일로부터 버전정보데이터의 크기가 얼마인지를 구합니다.
+	// 파일로부터 버전정보데이터의 크기
 	infoSize = GetFileVersionInfoSize(fpn_exe, 0);
 	if (infoSize == 0) return ver;
 
@@ -391,11 +394,12 @@ version getCurrentFileVersion()
 	buffer = new char[infoSize];
 
 	if (buffer) {
-		// 버전정보데이터를 가져옵니다.
+		// 버전정보데이터
 		if (GetFileVersionInfo(fpn_exe, 0, infoSize, buffer) != 0) {
 			VS_FIXEDFILEINFO* pFineInfo = NULL;
 			UINT bufLen = 0;
-			// buffer로 부터 VS_FIXEDFILEINFO 정보를 가져옵니다.
+			// buffer로 부터 VS_FIXEDFILEINFO 정보
+			//VerQueryValueA(buffer, "\\", (LPVOID*)&pFineInfo, &bufLen);
 			if (VerQueryValue(buffer, "\\", (LPVOID*)&pFineInfo, &bufLen) != 0) {
 				ver.major = HIWORD(pFineInfo->dwFileVersionMS);
 				ver.minor = LOWORD(pFineInfo->dwFileVersionMS);
@@ -883,7 +887,7 @@ tm stringToDateTime2(string yyyy_mm_dd__HHcolonMM) // 2017-11-28 23:10, 0123-56-
 	return t;
 }
 
-
+// yyyymmddHHMMSS
 string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int elaspedTimeSec)
 {
 	string startTime = startTime_yyyymmdd_HHcolonMM;
@@ -898,8 +902,8 @@ string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int
 }
 
 
-
-char* timeToString__yyyymmdd_HHcolonMMcolonSS(struct tm* t, int includeSEC) 
+// yyyymmdd HH:MM:SS
+char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC) 
 {
 	static char s[20];
 	if (includeSEC < 0)

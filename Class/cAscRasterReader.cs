@@ -28,7 +28,7 @@ namespace gentle
         private  double mValue_max = double.MinValue;
         private double mValue_min = double.MaxValue;
         private double mValue_sum = 0.0;
-        private double mValue_ave = 0.0;
+        //private double mValue_ave = 0.0;
         private int mCellCount_notNull = 0;
 
         public cAscRasterReader(string FPN)
