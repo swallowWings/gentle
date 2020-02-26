@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <map>
-#include <list>
+//#include <list>
 #include<fstream>
 #include <filesystem>
 #include<ATLComTime.h>
@@ -110,19 +110,18 @@ enum class rendererType
 };
 
 void appendTextToTextFile(string fpn, string textToAppend);
+
+bool compareNat(const std::string& a, const std::string& b);
 int confirmDeleteFile(string filePathNames);
 int confirmDeleteFiles(vector<string> filePathNames);
 
 // formatted numeric string
 string forString(double value, int precision); 
 
-void g2dHelp();
-
-//ascRasterExtent getAscRasterExtent(ascRasterHeader header);
-//ascRasterHeader getAscRasterHeader(string fpn_ascRasterFile);
-//ascRasterHeader getAscRasterHeader(string LinesForHeader[], string separator[]);
 CPUsInfo getCPUinfo();
 version getCurrentFileVersion();
+vector<string> getFileListInNaturalOrder(string path, string extension);
+vector<string> getFileList(string path, string extension);
 string getGPUinfo();
 string getValueStringFromXmlLine(string aLine, string fieldName);
 //char* getPath(char *fpn);
@@ -138,25 +137,22 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 	int colxNum, int rowyNum, rendererType rt,
     double rendererMaxV = 0, 	double nodataV = -9999);
 
-int openProjectFile();
-int openPrjAndSetupModel();
-
 vector<double> readTextFileToDoubleVector(string fpn);
 vector<float> readTextFileToFloatVector(string fpn);
 vector<string> readTextFileToStringVector(string fpn);
 map <int, vector<string>> readVatFile(string vatFPN, char seperator);
 string replaceText(string inText, string textToFind, string textToRepalce);
+
 tm secToHHMMSS(long sec);
 tm stringToDateTime(string yyyymmddHHMM);
 tm stringToDateTime2(string yyyymmdd_HHcolonMM);
-
 vector<double> splitToDoubleVector(string strToSplit, const char delimeter, bool removeEmptyEntry = true);
 vector<float> splitToFloatVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry=true);
 vector<double> splitToDoubleVector(string strToSplit, string delimeter, bool removeEmptyEntry = true);
 vector<int> splitToIntVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry = true);
 vector<string> splitToStringVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry = true);
-
 char* stringToCharP(string c_charP);
+
 string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int elaspedTimeSec);
 char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC = -1);
 string timeToString_yyyymmdd_HHclnMMclnSS(struct tm t, int includeSEC = -1);
@@ -164,6 +160,7 @@ string timeToString_yyyymmdd_HHclnMMclnSS(COleDateTime t, int includeSEC);
 string toLower(string instring);
 string toUpper(string instring);
 
+void waitEnterKey();
 bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsole);
 bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole);
 bool writeLog(fs::path fpn, string printText, int bprintFile, int bprintConsole);

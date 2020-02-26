@@ -5,7 +5,7 @@
 #include <io.h>
 #include <stdlib.h>
 #include <sstream>
-#include <list>
+//#include <list>
 #include<map>
 #include <time.h>
 #include<ATLComTime.h>
@@ -276,6 +276,39 @@ void appendTextToTextFile(string fpn, string textToAppend)
 	outfile << textToAppend;
 	outfile.close();
 }
+
+bool compareNat(const std::string& a, const std::string& b) 
+{
+	if (a.empty())
+		return true;
+	if (b.empty())
+		return false;
+	if (std::isdigit(a[0]) && !std::isdigit(b[0]))
+		return true;
+	if (!std::isdigit(a[0]) && std::isdigit(b[0]))
+		return false;
+	if (!std::isdigit(a[0]) && !std::isdigit(b[0]))	{
+		if (a[0] == b[0]) {
+			return compareNat(a.substr(1), b.substr(1));
+		}
+		return (toUpper(a) < toUpper(b));
+	}
+
+	std::istringstream issa(a);
+	std::istringstream issb(b);
+	int ia, ib;
+	issa >> ia;
+	issb >> ib;
+	if (ia != ib)	{
+		return ia < ib;
+	}
+		
+	std::string anew, bnew;
+	std::getline(issa, anew);
+	std::getline(issb, bnew);
+	return (compareNat(anew, bnew));
+}
+
 int confirmDeleteFiles(vector<string> filePathNames)
 {
 	bool bAlldeleted = false;
@@ -468,6 +501,25 @@ string getGPUinfo()
 	}
 	delete gpuInfo;
 	return infoStr;
+}
+
+vector<string> getFileList(string path, string extension)
+{
+	vector<string> flist;
+	for (const auto& entry : fs::directory_iterator(path)) {
+		fs::path filePath = entry.path();
+		if (toLower(filePath.extension().string())== extension) {
+			flist.push_back(filePath.string());
+		}
+	}
+	return flist;
+}
+
+vector<string> getFileListInNaturalOrder(string path, string extension)
+{
+	vector<string> flist = getFileList(path, extension);
+	std::sort(flist.begin(), flist.end(), compareNat);
+	return flist;
 }
 
 string getValueStringFromXmlLine(string aLine, string fieldName)
@@ -981,6 +1033,11 @@ string toUpper(string instring)
 	return instring;
 }
 
+void waitEnterKey()
+{
+	std::cout << "Press [Enter] to continue . . .";
+	std::cin.get();
+}
 
 bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintConsole)
 {
