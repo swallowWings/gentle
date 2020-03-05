@@ -5,6 +5,7 @@
 #include <io.h>
 #include <stdlib.h>
 #include <sstream>
+#include <omp.h>
 //#include <list>
 #include<map>
 #include <time.h>
@@ -73,7 +74,7 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 			int y = ly - dataStaringIndex;
 			int nX = (int)values.size();
 			for (int x = 0; x < nX; ++x) {
-				if (isNumericInt(values[x]) == true) {
+				if (isNumeric(values[x]) == true) {
 					valuesFromTL[x][y] = stod(values[x]);
 				}
 				else {
@@ -105,7 +106,7 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 				vector<string> values = values = splitToStringVector(aline, ' ');
 				for (int x = 0; x < values.size(); ++x) {
 					double v = 0;
-					if (isNumericInt(values[x]) == true) {
+					if (isNumeric(values[x]) == true) {
 						valuesFromTL[x][y] = stod(values[x]);
 					}
 					else {
@@ -170,16 +171,16 @@ ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char sepa
 			header.yllcorner = stod(LineParts[1]);
 			break;
 		case 4:
-			if (toLower(LineParts[0]) == "dx") {
-				if (isNumericInt(LineParts[1]) == true) {
+			if (lower(LineParts[0]) == "dx") {
+				if (isNumeric(LineParts[1]) == true) {
 					header.dx = stof(LineParts[1]);
 				}
 				else {
 					header.dx = -1;
 				}
 			}
-			else if (toLower(LineParts[0]) == "cellsize") {
-				if (isNumericInt(LineParts[1]) == true) {
+			else if (lower(LineParts[0]) == "cellsize") {
+				if (isNumeric(LineParts[1]) == true) {
 					header.cellsize = stof(LineParts[1]);
 				}
 				else {
@@ -191,16 +192,16 @@ ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char sepa
 			}
 			break;
 		case 5:
-			if (toLower(LineParts[0]) == "nodata_value") {
-				if (isNumericInt(LineParts[1]) == false) {
+			if (lower(LineParts[0]) == "nodata_value") {
+				if (isNumeric(LineParts[1]) == false) {
 					header.nodataValue = -9999;
 				}
 				else {
 					header.nodataValue = stoi(LineParts[1]);
 				}
 			}
-			else if (toLower(LineParts[0]) == "dy") {
-				if (isNumericInt(LineParts[1]) == true) {
+			else if (lower(LineParts[0]) == "dy") {
+				if (isNumeric(LineParts[1]) == true) {
 					header.dy = stof(LineParts[1]);
 				}
 				else {
@@ -212,8 +213,8 @@ ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char sepa
 			}
 			break;
 		case 6:
-			if (toLower(LineParts[0]) == "nodata_value") {
-				if (isNumericInt(LineParts[1]) == false) {
+			if (lower(LineParts[0]) == "nodata_value") {
+				if (isNumeric(LineParts[1]) == false) {
 					header.nodataValue = -9999;
 				}
 				else {
@@ -224,7 +225,7 @@ ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char sepa
 		}
 		if (ln > 4) {
 			if (LineParts.size() > 0) {
-				if (isNumericInt(LineParts[0]) == true) {
+				if (isNumeric(LineParts[0]) == true) {
 					header.dataStartingLineIndex = ln;
 					header.headerEndingLineIndex = ln - 1;
 					return header;
@@ -277,7 +278,7 @@ void appendTextToTextFile(string fpn, string textToAppend)
 	outfile.close();
 }
 
-bool compareNat(const std::string& a, const std::string& b) 
+bool compareNaturalOrder(const std::string& a, const std::string& b) 
 {
 	if (a.empty())
 		return true;
@@ -289,9 +290,9 @@ bool compareNat(const std::string& a, const std::string& b)
 		return false;
 	if (!std::isdigit(a[0]) && !std::isdigit(b[0]))	{
 		if (a[0] == b[0]) {
-			return compareNat(a.substr(1), b.substr(1));
+			return compareNaturalOrder(a.substr(1), b.substr(1));
 		}
-		return (toUpper(a) < toUpper(b));
+		return (upper(a) < upper(b));
 	}
 
 	std::istringstream issa(a);
@@ -306,7 +307,7 @@ bool compareNat(const std::string& a, const std::string& b)
 	std::string anew, bnew;
 	std::getline(issa, anew);
 	std::getline(issb, bnew);
-	return (compareNat(anew, bnew));
+	return (compareNaturalOrder(anew, bnew));
 }
 
 int confirmDeleteFiles(vector<string> filePathNames)
@@ -358,22 +359,13 @@ int confirmDeleteFile(string filePathNames)
 	return 1;
 }
 
+
 string forString(double value, int precision)
 {
 	stringstream stream;
 	stream << std::fixed << std::setprecision(precision) << value;
 	string s = stream.str();
 	return s;
-}
-
-bool isNumericDbl(string instr)
-{
-	return atof(instr.c_str()) != 0 || instr.compare("0") == 0;
-}
-
-bool isNumericInt(string instr)
-{
-	return atoi(instr.c_str()) != 0 || instr.compare("0") == 0;
 }
 
 CPUsInfo getCPUinfo()
@@ -508,7 +500,7 @@ vector<string> getFileList(string path, string extension)
 	vector<string> flist;
 	for (const auto& entry : fs::directory_iterator(path)) {
 		fs::path filePath = entry.path();
-		if (toLower(filePath.extension().string())== extension) {
+		if (lower(filePath.extension().string())== extension) {
 			flist.push_back(filePath.string());
 		}
 	}
@@ -518,7 +510,7 @@ vector<string> getFileList(string path, string extension)
 vector<string> getFileListInNaturalOrder(string path, string extension)
 {
 	vector<string> flist = getFileList(path, extension);
-	std::sort(flist.begin(), flist.end(), compareNat);
+	std::sort(flist.begin(), flist.end(), compareNaturalOrder);
 	return flist;
 }
 
@@ -546,6 +538,36 @@ string getValueStringFromXmlLine(string aLine, string fieldName)
 	else {
 		return "";
 	}
+}
+
+int getVectorIndex(vector<int> inv, int value)
+{
+	std::vector<int>::iterator it;
+	it = std::find(inv.begin(), inv.end(), value);
+	if (it == inv.end()) {
+		return -1;
+	}
+	else {
+		int idx = std::distance(inv.begin(), it);
+		return idx;
+	}
+}
+
+bool isNumericDbl(string instr)
+{
+	return atof(instr.c_str()) != 0 || instr.compare("0") == 0;
+}
+
+bool isNumericInt(string instr)
+{
+	return atoi(instr.c_str()) != 0 || instr.compare("0") == 0;
+}
+
+bool isNumeric(string instr)
+{
+	if (atof(instr.c_str()) != 0 || instr.compare("0") == 0) { 
+		return true; }
+	return atoi(instr.c_str()) != 0 || instr.compare("0") == 0;
 }
 
 void makeASCTextFile(string fpn, string allHeader, double** array2D,
@@ -641,25 +663,20 @@ map <int, vector<string>> readVatFile(string vatFPN, char seperator)
 {
 	map <int, vector<string>> values;
 	ifstream vatFile(vatFPN);
-	if (vatFile.is_open())
-	{
+	if (vatFile.is_open()) {
 		string aline;
 		int r = 0;
-		while (getline(vatFile, aline))
-		{
+		while (getline(vatFile, aline)) {
 			vector<string> parts = splitToStringVector(aline, seperator);
 			int attValue = 0;
-			if (parts.size() >1)
-			{
+			if (parts.size() > 1) {
 				attValue = stoi(parts[0]);
-				if (values.count(attValue) == 0)
-				{
+				if (values.count(attValue) == 0) {
 					parts.erase(parts.begin());
 					values.insert(make_pair(attValue, parts));
 				}
 			}
-			else
-			{
+			else {
 				string outstr;
 				outstr = "Values in VAT file (" + vatFPN + ") are invalid, or have no attributes.\n";
 				cout << outstr;
@@ -687,7 +704,7 @@ vector<double> readTextFileToDoubleVector(string fpn)
 	while (!txtFile.eof()) {
 		getline(txtFile, aline);
 		if (aline.size() > 0) {
-			if (isNumericDbl(aline) == true) {
+			if (isNumeric(aline) == true) {
 				linesv.push_back(stod(aline));
 			}
 			else {
@@ -707,7 +724,7 @@ vector<float> readTextFileToFloatVector(string fpn)
 	while (!txtFile.eof()) {
 		getline(txtFile, aline);
 		if (aline.size() > 0) {
-			if (isNumericDbl(aline) == true) {
+			if (isNumeric(aline) == true) {
 				linesv.push_back(stof(aline));
 			}
 			else {
@@ -719,16 +736,22 @@ vector<float> readTextFileToFloatVector(string fpn)
 	return linesv;
 }
 
+string readTextFileToString(string fpn)
+{
+	std::ifstream ifs("myfile.txt");
+	std::string content((std::istreambuf_iterator<char>(ifs)),
+		(std::istreambuf_iterator<char>()));
+	return content;
+}
+
 vector<string> readTextFileToStringVector(string fpn)
 {
 	ifstream txtFile(fpn);
 	string aline;
 	vector<string> linesv;
-	while (!txtFile.eof())
-	{
+	while (!txtFile.eof())	{
 		getline(txtFile, aline);
-		if (aline.size() > 0)
-		{
+		if (aline.size() > 0)		{
 			linesv.push_back(aline);
 		}		
 	}
@@ -759,19 +782,15 @@ vector<double> splitToDoubleVector(string stringToBeSplitted, char delimeter, bo
 	string item;
 	//char * seprator = delimeter.c_str();
 	vector<double> splittedValues;
-	while (getline(ss, item, delimeter))
-	{
+	while (getline(ss, item, delimeter)) {
 		string sv = trim(item);
-		if (removeEmptyEntry == true)
-		{
-			if (sv != "")
-			{
+		if (removeEmptyEntry == true) {
+			if (sv != "") {
 				v = stod(sv);
 				splittedValues.push_back(v);
 			}
 		}
-		else
-		{
+		else {
 			v = stod(sv);
 			splittedValues.push_back(v);
 		}
@@ -782,23 +801,19 @@ vector<double> splitToDoubleVector(string stringToBeSplitted, char delimeter, bo
 vector<float> splitToFloatVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry)
 {
 	stringstream ss(stringToBeSplitted);
-	double v;
+	float v;
 	string item;
 	//char * seprator = delimeter.c_str();
 	vector<float> splittedValues;
-	while (getline(ss, item, delimeter))
-	{
+	while (getline(ss, item, delimeter)) {
 		string sv = trim(item);
-		if (removeEmptyEntry == true)
-		{
-			if (sv != "")
-			{
+		if (removeEmptyEntry == true) {
+			if (sv != "") {
 				v = stof(sv);
 				splittedValues.push_back(v);
 			}
 		}
-		else
-		{
+		else {
 			v = stof(sv);
 			splittedValues.push_back(v);
 		}
@@ -809,46 +824,38 @@ vector<float> splitToFloatVector(string stringToBeSplitted, char delimeter, bool
 /*
 std::string split implementation by using delimeter as an another string
 */
-vector<double> splitToDoubleVector(string stringToBeSplitted, string delimeter, bool removeEmptyEntry )
+vector<double> splitToDoubleVector(string stringToBeSplitted, string delimeter, bool removeEmptyEntry)
 {
 	vector<double> splittedValues;
 	int startIndex = 0;
 	int  endIndex = 0;
-	while ((endIndex = (int)stringToBeSplitted.find(delimeter, startIndex)) < (int) stringToBeSplitted.size())
-	{
+	while ((endIndex = (int)stringToBeSplitted.find(delimeter, startIndex)) < (int)stringToBeSplitted.size()) {
 		string item = stringToBeSplitted.substr(startIndex, endIndex - startIndex);
 		string sv = trim(item);
 		double val;
-		if (removeEmptyEntry == true)
-		{
-			if (sv != "")
-			{
+		if (removeEmptyEntry == true) {
+			if (sv != "") {
 				val = stod(sv);
 				splittedValues.push_back(val);
 			}
 		}
-		else
-		{
+		else {
 			val = stod(sv);
 			splittedValues.push_back(val);
 		}
 		startIndex = endIndex + (int)delimeter.size();
 	}
-	if (startIndex < stringToBeSplitted.size())
-	{
+	if (startIndex < stringToBeSplitted.size()) {
 		string item = stringToBeSplitted.substr(startIndex);
 		string sv = trim(item);
 		double val;
-		if (removeEmptyEntry == true)
-		{
-			if (sv != "")
-			{
+		if (removeEmptyEntry == true) {
+			if (sv != "") {
 				val = stod(sv);
 				splittedValues.push_back(val);
 			}
 		}
-		else
-		{
+		else {
 			val = stod(sv);
 			splittedValues.push_back(val);
 		}
@@ -864,19 +871,15 @@ vector<int> splitToIntVector(string stringToBeSplitted, char delimeter, bool rem
 	string item;
 	//char * seprator = delimeter.c_str();
 	vector<int> splittedValues;
-	while (getline(ss, item, delimeter))
-	{
+	while (getline(ss, item, delimeter)) {
 		string sv = trim(item);
-		if (removeEmptyEntry == true)
-		{
-			if (sv != "")
-			{
+		if (removeEmptyEntry == true) {
+			if (sv != "") {
 				v = stoi(sv);
 				splittedValues.push_back(v);
 			}
 		}
-		else
-		{
+		else {
 			v = stoi(sv);
 			splittedValues.push_back(v);
 		}
@@ -891,21 +894,16 @@ vector<string> splitToStringVector(string stringToBeSplitted, char delimeter, bo
 	string item;
 	//char * seprator = delimeter.c_str();
 	vector<string> splittedValues;
-	while (getline(ss, item, delimeter))
-	{
+	while (getline(ss, item, delimeter)) {
 		v = trim(item);
-		if (removeEmptyEntry == true )			
-		{
-			if (v != "")
-			{
+		if (removeEmptyEntry == true) {
+			if (v != "") {
 				splittedValues.push_back(v);
 			}
 		}
-		else
-		{
+		else {
 			splittedValues.push_back(v);
 		}
-
 	}
 	return splittedValues;
 }
@@ -958,14 +956,12 @@ string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int
 char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC) 
 {
 	static char s[20];
-	if (includeSEC < 0)
-	{
+	if (includeSEC < 0)	{
 		sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
 			t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
 			t->tm_hour, t->tm_min);// , t->tm_sec);
 	}
-	else
-	{
+	else	{
 		sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
 			t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
 			t->tm_hour, t->tm_min, t->tm_sec);
@@ -976,14 +972,12 @@ char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC)
 string timeToString_yyyymmdd_HHclnMMclnSS(struct tm t, int includeSEC)
 {
 	static char s[20];
-	if (includeSEC < 0)
-	{
+	if (includeSEC < 0) {
 		sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
 			t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
 			t.tm_hour, t.tm_min);// , t->tm_sec);
 	}
-	else
-	{
+	else {
 		sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
 			t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
 			t.tm_hour, t.tm_min, t.tm_sec);
@@ -995,12 +989,10 @@ string timeToString_yyyymmdd_HHclnMMclnSS(struct tm t, int includeSEC)
 string timeToString_yyyymmdd_HHclnMMclnSS(COleDateTime t, int includeSEC)
 {
 	string s;
-	if (includeSEC < 0)
-	{
+	if (includeSEC < 0) {
 		s = t.Format(_T("%Y-%m-%d %H:%M"));
 	}
-	else
-	{
+	else {
 		s = t.Format(_T("%Y-%m-%d %H:%M:%S"));
 	}
 	return s;
@@ -1009,25 +1001,23 @@ string timeToString_yyyymmdd_HHclnMMclnSS(COleDateTime t, int includeSEC)
 string timeToString_yyyymmddHHMMSS(COleDateTime t, int includeSEC)
 {
 	string s;
-	if (includeSEC < 0)
-	{
+	if (includeSEC < 0) {
 		s = t.Format(_T("%Y%m%d%H%M"));
 	}
-	else
-	{
+	else {
 		s = t.Format(_T("%Y%m%d%H:%M:%S"));
 	}
 	return s;
 }
 
 
-string toLower(string instring)
+string lower(string instring)
 {
 	std::transform(instring.begin(), instring.end(), instring.begin(), tolower);
 	return instring;
 }
 
-string toUpper(string instring)
+string upper(string instring)
 {
 	std::transform(instring.begin(), instring.end(), instring.begin(), toupper);
 	return instring;
@@ -1041,12 +1031,10 @@ void waitEnterKey()
 
 bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintConsole)
 {
-	if (bprintConsole > 0)
-	{
+	if (bprintConsole > 0) {
 		printf(printText);
 	}
-	if (bprintFile > 0)
-	{
+	if (bprintFile > 0) {
 		time_t now = time(0);
 		//tm *ltm = localtime(&now);
 		tm ltm;
@@ -1056,7 +1044,6 @@ bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintCon
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
 		outfile.close();
-
 		//FILE* outFile;
 		//outFile = fopen(fpn, "w");
 		//fprintf(outFile, printText);
@@ -1067,12 +1054,10 @@ bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintCon
 
 bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 {
-	if (bprintConsole > 0)
-	{
+	if (bprintConsole > 0)	{
 		printf(printText);
 	}
-	if (bprintFile > 0)
-	{
+	if (bprintFile > 0)	{
 		time_t now = time(0);
 		tm ltm;
 		localtime_s(&ltm, &now);
@@ -1081,7 +1066,6 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
 		outfile.close();
-
 		//FILE* outFile;
 		//string pstr = fpn.string();
 		//const char* fpn_cchar = pstr.c_str();
@@ -1094,19 +1078,17 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 
 bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConsole)
 {
-	if (bprintConsole > 0)
-	{
+	if (bprintConsole > 0) {
 		cout << printText;
 	}
-	if (bprintFile > 0)
-	{
+	if (bprintFile > 0) {
 		time_t now = time(0);
 		tm ltm;
 		localtime_s(&ltm, &now);
 		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
-		outfile << nows+" "+printText;
+		outfile << nows + " " + printText;
 		outfile.close();
 	}
 	return true;
@@ -1114,19 +1096,15 @@ bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConso
 
 bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsole)
 {
-	if (bprintConsole > 0)
-	{
+	if (bprintConsole > 0) {
 		printf(printText);
 	}
-	if (bprintFile > 0)
-	{
+	if (bprintFile > 0) {
 		std::ofstream outfile;
-		if (fs::exists(fpn) == false)
-		{
+		if (fs::exists(fpn) == false) {
 			outfile.open(fpn, ios::out);
 		}
-		else if (fs::exists(fpn) == true)
-		{
+		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
 		time_t now = time(0);
@@ -1135,7 +1113,6 @@ bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsol
 		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
 		outfile << nows + " " + printText;
 		outfile.close();
-
 		//FILE* outFile;
 		//int nResult = access(fpn, 0);
 		//if (nResult == -1)
@@ -1154,20 +1131,16 @@ bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsol
 
 bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 {
-	if (bprintConsole > 0)
-	{
+	if (bprintConsole > 0) {
 		printf(printText);
 	}
 
-	if (bprintFile > 0)
-	{
+	if (bprintFile > 0) {
 		std::ofstream outfile;
-		if (fs::exists(fpn) == false)
-		{
+		if (fs::exists(fpn) == false) {
 			outfile.open(fpn, ios::out);
 		}
-		else if (fs::exists(fpn) == true)
-		{
+		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
 		time_t now = time(0);
@@ -1176,7 +1149,6 @@ bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
 		outfile << nows + " " + printText;
 		outfile.close();
-
 		//FILE* outFile;
 		//string pstr = fpn.string();
 		//const char* fpn_cchar = pstr.c_str();
@@ -1197,12 +1169,10 @@ bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 
 bool writeLog(fs::path fpn, string printText, int bprintFile, int bprintConsole)
 {
-	if (bprintConsole > 0)
-	{
+	if (bprintConsole > 0) {
 		cout << printText;// << endl;
 	}
-	if (bprintFile > 0)
-	{
+	if (bprintFile > 0) {
 		std::ofstream outfile;
 		if (fs::exists(fpn) == false) {
 			outfile.open(fpn, ios::out);

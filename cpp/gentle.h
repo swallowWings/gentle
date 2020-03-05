@@ -12,6 +12,7 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+#define ENUM_TO_STR(ENUM) std::string(#ENUM)
 const int CONST_BIG_SIZE_ARRAY_THRESHOLD = 200000000;
 
 typedef struct _ascRasterExtent
@@ -82,9 +83,10 @@ enum class flowDirection8
 
 enum class rainfallDataType
 {
-	NoneRF, //0
-	TextFileMAP, //1
-	TextFileASCgrid //2
+	NoneRF, 
+	TextFileMAP, 
+	TextFileASCgrid, 
+	TextFileASCgrid_mmPhr
 };
 
 // 1:Discharge, 2:Depth, 3:Height, 4:None
@@ -111,7 +113,7 @@ enum class rendererType
 
 void appendTextToTextFile(string fpn, string textToAppend);
 
-bool compareNat(const std::string& a, const std::string& b);
+bool compareNaturalOrder(const std::string& a, const std::string& b);
 int confirmDeleteFile(string filePathNames);
 int confirmDeleteFiles(vector<string> filePathNames);
 
@@ -123,9 +125,11 @@ version getCurrentFileVersion();
 vector<string> getFileListInNaturalOrder(string path, string extension);
 vector<string> getFileList(string path, string extension);
 string getGPUinfo();
+int getVectorIndex(vector<int> inv, int value);
 string getValueStringFromXmlLine(string aLine, string fieldName);
 //char* getPath(char *fpn);
 
+bool isNumeric(string instr);
 bool isNumericDbl(string instr);
 bool isNumericInt(string instr);
 
@@ -140,6 +144,7 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 vector<double> readTextFileToDoubleVector(string fpn);
 vector<float> readTextFileToFloatVector(string fpn);
 vector<string> readTextFileToStringVector(string fpn);
+string readTextFileToString(string fpn);
 map <int, vector<string>> readVatFile(string vatFPN, char seperator);
 string replaceText(string inText, string textToFind, string textToRepalce);
 
@@ -157,8 +162,8 @@ string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int
 char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC = -1);
 string timeToString_yyyymmdd_HHclnMMclnSS(struct tm t, int includeSEC = -1);
 string timeToString_yyyymmdd_HHclnMMclnSS(COleDateTime t, int includeSEC);
-string toLower(string instring);
-string toUpper(string instring);
+string lower(string instring);
+string upper(string instring);
 
 void waitEnterKey();
 bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsole);

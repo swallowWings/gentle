@@ -38,12 +38,12 @@ class bitmap_image
 {
 public:
 
-   enum channel_mode {
+   enum class channel_mode {
                         rgb_mode = 0,
                         bgr_mode = 1
                      };
 
-   enum color_plane {
+   enum class color_plane {
                        blue_plane  = 0,
                        green_plane = 1,
                        red_plane   = 2
@@ -62,7 +62,7 @@ public:
      height_         (0),
      row_increment_  (0),
      bytes_per_pixel_(3),
-     channel_mode_(bgr_mode)
+     channel_mode_(channel_mode::bgr_mode)
    {}
 
    bitmap_image(const std::string& filename)
@@ -71,7 +71,7 @@ public:
      height_         (0),
      row_increment_  (0),
      bytes_per_pixel_(0),
-     channel_mode_(bgr_mode)
+     channel_mode_(channel_mode::bgr_mode)
    {
       load_bitmap();
    }
@@ -82,7 +82,7 @@ public:
      height_(height),
      row_increment_  (0),
      bytes_per_pixel_(3),
-     channel_mode_(bgr_mode)
+     channel_mode_(channel_mode::bgr_mode)
    {
       create_bitmap();
    }
@@ -93,7 +93,7 @@ public:
      height_   (image.height_   ),
      row_increment_  (0),
      bytes_per_pixel_(3),
-     channel_mode_(bgr_mode)
+     channel_mode_(channel_mode::bgr_mode)
    {
       create_bitmap();
       data_ = image.data_;
@@ -573,7 +573,7 @@ public:
       double g_scaler = 0.587;
       double b_scaler = 0.114;
 
-      if (rgb_mode == channel_mode_)
+      if (channel_mode::rgb_mode == channel_mode_)
       {
          std::swap(r_scaler, b_scaler);
       }
@@ -605,19 +605,19 @@ public:
 
    inline void bgr_to_rgb()
    {
-      if ((bgr_mode == channel_mode_) && (3 == bytes_per_pixel_))
+      if ((channel_mode::bgr_mode == channel_mode_) && (3 == bytes_per_pixel_))
       {
          reverse_channels();
-         channel_mode_ = rgb_mode;
+         channel_mode_ = channel_mode::rgb_mode;
       }
    }
 
    inline void rgb_to_bgr()
    {
-      if ((rgb_mode == channel_mode_) && (3 == bytes_per_pixel_))
+      if ((channel_mode::rgb_mode == channel_mode_) && (3 == bytes_per_pixel_))
       {
          reverse_channels();
-         channel_mode_ = bgr_mode;
+         channel_mode_ = channel_mode::bgr_mode;
       }
    }
 
@@ -740,7 +740,7 @@ public:
 
    inline void export_rgb(double* red, double* green, double* blue) const
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (const unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -753,7 +753,7 @@ public:
 
    inline void export_rgb(float* red, float* green, float* blue) const
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (const unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -766,7 +766,7 @@ public:
 
    inline void export_rgb(unsigned char* red, unsigned char* green, unsigned char* blue) const
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (const unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -779,7 +779,7 @@ public:
 
    inline void export_ycbcr(double* y, double* cb, double* cr) const
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (const unsigned char* itr = data(); itr < end(); ++y, ++cb, ++cr)
@@ -796,7 +796,7 @@ public:
 
    inline void export_rgb_normal(double* red, double* green, double* blue) const
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (const unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -809,7 +809,7 @@ public:
 
    inline void export_rgb_normal(float* red, float* green, float* blue) const
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (const unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -822,7 +822,7 @@ public:
 
    inline void import_rgb(double* red, double* green, double* blue)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -835,7 +835,7 @@ public:
 
    inline void import_rgb(float* red, float* green, float* blue)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -848,7 +848,7 @@ public:
 
    inline void import_rgb(unsigned char* red, unsigned char* green, unsigned char* blue)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -861,7 +861,7 @@ public:
 
    inline void import_ycbcr(double* y, double* cb, double* cr)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++y, ++cb, ++cr)
@@ -878,7 +878,7 @@ public:
 
    inline void import_gray_scale_clamped(double* gray)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++gray)
@@ -895,7 +895,7 @@ public:
 
    inline void import_rgb_clamped(double* red, double* green, double* blue)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -908,7 +908,7 @@ public:
 
    inline void import_rgb_clamped(float* red, float* green, float* blue)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -921,7 +921,7 @@ public:
 
    inline void import_rgb_normal(double* red, double* green, double* blue)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -934,7 +934,7 @@ public:
 
    inline void import_rgb_normal(float* red, float* green, float* blue)
    {
-      if (bgr_mode != channel_mode_)
+      if (channel_mode::bgr_mode != channel_mode_)
          return;
 
       for (unsigned char* itr = data(); itr < end(); ++red, ++green, ++blue)
@@ -1251,22 +1251,22 @@ public:
    {
       switch (channel_mode_)
       {
-         case rgb_mode : {
+         case channel_mode::rgb_mode : {
                             switch (color)
                             {
-                               case red_plane   : return 0;
-                               case green_plane : return 1;
-                               case blue_plane  : return 2;
+                            case color_plane::red_plane   : return 0;
+                               case color_plane::green_plane : return 1;
+                               case color_plane::blue_plane  : return 2;
                                default          : return (std::numeric_limits<unsigned int>::max)();
                             }
                          }
 
-         case bgr_mode : {
+         case channel_mode::bgr_mode : {
                             switch (color)
                             {
-                               case red_plane   : return 2;
-                               case green_plane : return 1;
-                               case blue_plane  : return 0;
+                               case color_plane::red_plane   : return 2;
+                               case color_plane::green_plane : return 1;
+                               case color_plane::blue_plane  : return 0;
                                default          : return (std::numeric_limits<unsigned int>::max)();
                             }
                          }
