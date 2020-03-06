@@ -33,7 +33,6 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-
 ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 {
 	fs::path fpnASC = fpn_ascRasterFile;
@@ -50,8 +49,9 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 	}
 	else {
 		string outstr;
-		outstr = "ASCII file (" + fpn_ascRasterFile + ") are invalid. It could not be opened.\n";
+		outstr = "ASCII file (" + fpn_ascRasterFile + ") is invalid. It could not be opened.\n";
 		cout << outstr;
+		return;
 	}
 	header = getAscRasterHeader(linesForHeader, separator);
 	headerStringAll = makeHeaderString(header.nCols, header.nRows,
