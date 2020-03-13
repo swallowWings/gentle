@@ -111,6 +111,13 @@ enum class rendererType
 	Risk
 };
 
+enum class dateTimeFormat
+{
+	yyyymmdd_HHcolMMcolSS, // 20200324 15:30
+	yyyy_mm_dd_HHcolMMcolSS, // 2020-03-24 15:30
+	yyyymmddHHMMSS //202003241530
+};
+
 void appendTextToTextFile(string fpn, string textToAppend);
 
 bool compareNaturalOrder(const std::string& a, const std::string& b);
@@ -125,6 +132,8 @@ version getCurrentFileVersion();
 vector<string> getFileListInNaturalOrder(string path, string extension);
 vector<string> getFileList(string path, string extension);
 string getGPUinfo();
+//template<int, typename TV>//template<typename TK, typename TV>
+//vector <int> getKeys(map<int, TV> inmap);
 int getVectorIndex(vector<int> inv, int value);
 string getValueStringFromXmlLine(string aLine, string fieldName);
 //char* getPath(char *fpn);
@@ -158,10 +167,11 @@ vector<int> splitToIntVector(string stringToBeSplitted, char delimeter, bool rem
 vector<string> splitToStringVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry = true);
 char* stringToCharP(string c_charP);
 
-string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int elaspedTimeSec);
-char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC = -1);
-string timeToString_yyyymmdd_HHclnMMclnSS(struct tm t, int includeSEC = -1);
-string timeToString_yyyymmdd_HHclnMMclnSS(COleDateTime t, int includeSEC);
+string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
+	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat);
+char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat);
+string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat);
+string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat);
 string lower(string instring);
 string upper(string instring);
 

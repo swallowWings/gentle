@@ -398,6 +398,7 @@ CPUsInfo getCPUinfo()
 	CPUsInfo cpusi;
 	cpusi.infoString = infoStr;
 	cpusi.numberOfCPUs = cpuInfo->numberOfCPUInfoItems();
+	cpusi.totalNumberOfLogicalProcessors = totalLP;
 	delete cpuInfo;
 	return cpusi;
 }
@@ -449,7 +450,8 @@ version getCurrentFileVersion()
 					//printf("\tTime Last Access  : %s\n", timeToString(localtime(&buf.st_atime)));
 					tm ltm;
 					localtime_s(&ltm, &buf.st_mtime);
-					sprintf_s(ver.LastWrittenTime, timeToString_yyyymmdd_HHclnMMclnSS(ltm).c_str());
+					sprintf_s(ver.LastWrittenTime, timeToString(ltm,
+						false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS).c_str());
 				}
 			}
 		}
@@ -514,6 +516,19 @@ vector<string> getFileListInNaturalOrder(string path, string extension)
 	return flist;
 }
 
+//template<int, typename TV>
+//vector <int> getKeys(map<int, TV> inmap)
+//{
+//	vector<int> ks;
+//	map<int, TV>::iterator iter;
+//	map<int, TV>::iterator iter_end;
+//	iter_end = inmap.end();
+//	for (iter = inmap.begin(); iter != iter_end; ++iter) {
+//		ks.push_back(iter->first);
+//	}
+//	return ks;
+//}
+
 string getValueStringFromXmlLine(string aLine, string fieldName)
 {
 	int len_fiedlName = 0;
@@ -565,9 +580,18 @@ bool isNumericInt(string instr)
 
 bool isNumeric(string instr)
 {
-	if (atof(instr.c_str()) != 0 || instr.compare("0") == 0) { 
-		return true; }
-	return atoi(instr.c_str()) != 0 || instr.compare("0") == 0;
+	char* error;
+	double num = strtod(instr.c_str(), &error);
+	if (*error) {
+		return false;
+	}
+	else {
+		return true;
+	}
+	//if (atof(instr.c_str()) != 0 || instr.compare("0") == 0) { 
+	//	return true; 
+	//}
+	//return atoi(instr.c_str()) != 0 || instr.compare("0") == 0;
 }
 
 void makeASCTextFile(string fpn, string allHeader, double** array2D,
@@ -938,7 +962,8 @@ tm stringToDateTime2(string yyyy_mm_dd__HHcolonMM) // 2017-11-28 23:10, 0123-56-
 }
 
 // yyyymmddHHMMSS
-string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int elaspedTimeSec)
+string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
+	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat)
 {
 	string startTime = startTime_yyyymmdd_HHcolonMM;
 	tm tms = stringToDateTime2(startTime);
@@ -947,69 +972,125 @@ string timeElaspedToString_yyyymmddHHMM(string startTime_yyyymmdd_HHcolonMM, int
 	SpendTime.SetDateTimeSpan(0, 0, 0, elaspedTimeSec);
 	pt = pt + SpendTime;
 	string time_elasped;
-	time_elasped = pt.Format(_T("%Y%m%d%H%M"));
+
+	if (includeSEC == false) {
+		switch (tformat) {
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			time_elasped = pt.Format(_T("%Y%m%d%H%M"));
+			break;
+		}
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			time_elasped = pt.Format(_T("%Y-%m-%d %H:%M"));
+			break;
+		}
+		case dateTimeFormat::yyyymmdd_HHcolMMcolSS: {
+			time_elasped = pt.Format(_T("%Y%m%d %H:%M"));
+			break;
+		}
+		}
+	}
+	else {
+		switch (tformat) {
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			time_elasped = pt.Format(_T("%Y%m%d%H%M%S"));
+			break;
+		}
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			time_elasped = pt.Format(_T("%Y-%m-%d %H:%M:%S"));
+			break;
+		}
+		case dateTimeFormat::yyyymmdd_HHcolMMcolSS: {
+			time_elasped = pt.Format(_T("%Y%m%d %H:%M:%S"));
+			break;
+		}
+		}
+	}
 	return time_elasped;
 }
 
-
 // yyyymmdd HH:MM:SS
-char* timeToString_yyyymmdd_HHclnMMclnSS(struct tm* t, int includeSEC) 
+char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat)
 {
 	static char s[20];
-	if (includeSEC < 0)	{
-		sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
-			t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-			t->tm_hour, t->tm_min);// , t->tm_sec);
+	if (includeSEC ==false) {
+		switch (tformat) {
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
+				t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+				t->tm_hour, t->tm_min);
+			break;
+		}
+		}
 	}
-	else	{
-		sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
-			t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
-			t->tm_hour, t->tm_min, t->tm_sec);
+	else {
+		switch (tformat) {
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
+				t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+				t->tm_hour, t->tm_min, t->tm_sec);
+			break;
+		}
+		}
 	}
 	return s;
 }
 
-string timeToString_yyyymmdd_HHclnMMclnSS(struct tm t, int includeSEC)
+string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat)
 {
 	static char s[20];
-	if (includeSEC < 0) {
-		sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
-			t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
-			t.tm_hour, t.tm_min);// , t->tm_sec);
+	if (includeSEC ==false) {
+		switch (tformat) {
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
+				t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
+				t.tm_hour, t.tm_min);
+			break;
+		}
+		}
 	}
 	else {
-		sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
-			t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
-			t.tm_hour, t.tm_min, t.tm_sec);
+		switch (tformat) {
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
+				t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
+				t.tm_hour, t.tm_min, t.tm_sec);
+			break;
+		}
+		}
 	}
 	return s;
 }
 
 
-string timeToString_yyyymmdd_HHclnMMclnSS(COleDateTime t, int includeSEC)
+string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat)
 {
 	string s;
-	if (includeSEC < 0) {
-		s = t.Format(_T("%Y-%m-%d %H:%M"));
+	if (includeSEC ==false) {
+		switch (tformat) {
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			s = t.Format(_T("%Y-%m-%d %H:%M"));
+			break;
+		}
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			s = t.Format(_T("%Y%m%d%H%M"));
+			break;
+		}
+		}
 	}
 	else {
-		s = t.Format(_T("%Y-%m-%d %H:%M:%S"));
+		switch (tformat) {
+		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+			s = t.Format(_T("%Y-%m-%d %H:%M:%S"));
+			break;
+		}
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			s = t.Format(_T("%Y%m%d%H:%M:%S"));
+			break;
+		}
+		}
 	}
 	return s;
 }
-
-string timeToString_yyyymmddHHMMSS(COleDateTime t, int includeSEC)
-{
-	string s;
-	if (includeSEC < 0) {
-		s = t.Format(_T("%Y%m%d%H%M"));
-	}
-	else {
-		s = t.Format(_T("%Y%m%d%H:%M:%S"));
-	}
-	return s;
-}
-
 
 string lower(string instring)
 {
@@ -1039,7 +1120,8 @@ bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintCon
 		//tm *ltm = localtime(&now);
 		tm ltm;
 		localtime_s(&ltm, &now);
-		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
+		string nows = timeToString(ltm, 
+			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
@@ -1061,7 +1143,8 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 		time_t now = time(0);
 		tm ltm;
 		localtime_s(&ltm, &now);
-		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
+		string nows = timeToString(ltm,
+			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
@@ -1085,7 +1168,8 @@ bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConso
 		time_t now = time(0);
 		tm ltm;
 		localtime_s(&ltm, &now);
-		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
+		string nows = timeToString(ltm,
+			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
@@ -1110,7 +1194,8 @@ bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsol
 		time_t now = time(0);
 		tm ltm;
 		localtime_s(&ltm, &now);
-		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
+		string nows = timeToString(ltm, 
+			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
 		//FILE* outFile;
@@ -1146,7 +1231,8 @@ bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 		time_t now = time(0);
 		tm ltm;
 		localtime_s(&ltm, &now);
-		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
+		string nows = timeToString(ltm,
+			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
 		//FILE* outFile;
@@ -1183,7 +1269,8 @@ bool writeLog(fs::path fpn, string printText, int bprintFile, int bprintConsole)
 		time_t now = time(0);
 		tm ltm;
 		localtime_s(&ltm, &now);
-		string nows = timeToString_yyyymmdd_HHclnMMclnSS(ltm);
+		string nows = timeToString(ltm, 
+			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
 	}
