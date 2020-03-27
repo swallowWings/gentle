@@ -57,8 +57,8 @@ typedef struct _cellPosition
 typedef struct _CPUsInfo
 {
 	string infoString = "";
-	int numberOfCPUs = 0;
-	int totalNumberOfLogicalProcessors = 0;
+	int numOfCPUs = 0;
+	int totalNumOfLP = 0; //total number of logical processors
 } CPUsInfo;
 
 typedef struct _version
@@ -166,9 +166,9 @@ vector<double> splitToDoubleVector(string strToSplit, string delimeter, bool rem
 vector<int> splitToIntVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry = true);
 vector<string> splitToStringVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry = true);
 char* stringToCharP(string c_charP);
-
-string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
-	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat);
+// start time format¿∫ yyyy-mm-dd HH:MM
+string timeElaspedToDateTimeFormat(string startTime,
+	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat); 
 char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat);
 string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat);
 string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat);

@@ -397,8 +397,8 @@ CPUsInfo getCPUinfo()
 	}
 	CPUsInfo cpusi;
 	cpusi.infoString = infoStr;
-	cpusi.numberOfCPUs = cpuInfo->numberOfCPUInfoItems();
-	cpusi.totalNumberOfLogicalProcessors = totalLP;
+	cpusi.numOfCPUs = cpuInfo->numberOfCPUInfoItems();
+	cpusi.totalNumOfLP = totalLP;
 	delete cpuInfo;
 	return cpusi;
 }
@@ -961,11 +961,11 @@ tm stringToDateTime2(string yyyy_mm_dd__HHcolonMM) // 2017-11-28 23:10, 0123-56-
 	return t;
 }
 
-// yyyymmddHHMMSS
-string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
+// start time format¿∫ yyyy-mm-dd HH:MM
+string timeElaspedToDateTimeFormat(string startTime,
 	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat)
 {
-	string startTime = startTime_yyyymmdd_HHcolonMM;
+	string startTime = startTime;
 	tm tms = stringToDateTime2(startTime);
 	COleDateTime pt(tms.tm_year, tms.tm_mon, tms.tm_mday, tms.tm_hour, tms.tm_min, 0);
 	COleDateTimeSpan SpendTime;
