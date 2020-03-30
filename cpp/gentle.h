@@ -58,7 +58,7 @@ typedef struct _CPUsInfo
 {
 	string infoString = "";
 	int numberOfCPUs = 0;
-	int totalNumberOfLogicalProcessors = 0;
+	int totalNumOfLP = 0;
 } CPUsInfo;
 
 typedef struct _version

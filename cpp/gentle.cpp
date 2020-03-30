@@ -393,7 +393,7 @@ CPUsInfo getCPUinfo()
 	CPUsInfo cpusi;
 	cpusi.infoString = infoStr;
 	cpusi.numberOfCPUs = cpuInfo->numberOfCPUInfoItems();
-	cpusi.totalNumberOfLogicalProcessors = totalLP;
+	cpusi.totalNumOfLP = totalLP;
 	delete cpuInfo;
 	return cpusi;
 }
