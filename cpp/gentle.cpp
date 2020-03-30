@@ -80,16 +80,13 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 				else {
 					valuesFromTL[x][y] = header.nodataValue;
 				}
-				if (valuesFromTL[x][y] != header.nodataValue)
-				{
+				if (valuesFromTL[x][y] != header.nodataValue) {
 					cellCount_notNull++;
 					value_sum = value_sum + valuesFromTL[x][y];
-					if (valuesFromTL[x][y] > value_max)
-					{
+					if (valuesFromTL[x][y] > value_max) {
 						value_max = valuesFromTL[x][y];
 					}
-					if (valuesFromTL[x][y] < value_min)
-					{
+					if (valuesFromTL[x][y] < value_min) {
 						value_min = valuesFromTL[x][y];
 					}
 				}
@@ -116,12 +113,10 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 					{
 						cellCount_notNull++;
 						value_sum = value_sum + valuesFromTL[x][y];
-						if (valuesFromTL[x][y] > value_max)
-						{
+						if (valuesFromTL[x][y] > value_max) {
 							value_max = valuesFromTL[x][y];
 						}
-						if (valuesFromTL[x][y] < value_min)
-						{
+						if (valuesFromTL[x][y] < value_min) {
 							value_min = valuesFromTL[x][y];
 						}
 					}
@@ -712,11 +707,55 @@ map <int, vector<string>> readVatFile(string vatFPN, char seperator)
 	return values;
 }
 
+//bool removeFolder(string filePath)
+//{
+//	//if (access(filePath.c_str(), 0) == 0) {
+//	//	// 파일이 있다.
+//		//fs::remove_all(filePath);
+//		//fs::remove(filePath);
+//	//}
+//	//else {
+//	//	//파일이 없다.
+//		//fs::remove(filePath);
+//	//}
+//
+//	CString fp(filePath.c_str());
+//	if (fp.IsEmpty()) {
+//		RemoveDirectory(fp);
+//	}
+//	else {
+//		CFileFind   ff;
+//		BOOL   bFound = ff.FindFile(fp + _T("\\*"), 0);
+//		while (bFound) {
+//			bFound = ff.FindNextFile();
+//			if (ff.GetFileName() == _T(".") || ff.GetFileName() == _T(".."))
+//				continue;
+//			SetFileAttributes(ff.GetFilePath(), FILE_ATTRIBUTE_NORMAL);
+//			if (ff.IsDirectory()==true) {
+//				DeleteDirectory(ff.GetFilePath());
+//				RemoveDirectory(ff.GetFilePath());
+//			}
+//			else {
+//				DeleteFile(ff.GetFilePath());
+//			}
+//		}
+//		ff.Close();
+//		RemoveDirectory(fp);
+//	}
+//	return true;
+//}
+
 string replaceText(string inText, string textToFind, string textToRepalce)
 {
+	string s;
 	int idxStart = inText.find(textToFind, 0);
-	int length = textToFind.length();
-	string s = inText.replace(idxStart, length, textToRepalce);
+	if (idxStart > 0) {
+		int length = textToFind.length();
+		s = inText.replace(idxStart, length, textToRepalce);
+	}
+	else {
+		s = inText;
+	}
 	return s;
 }
 
@@ -1235,20 +1274,6 @@ bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
-		//FILE* outFile;
-		//string pstr = fpn.string();
-		//const char* fpn_cchar = pstr.c_str();
-
-		//if (fs::exists(fpn) == false)
-		//{
-		//	outFile = fopen(fpn_cchar, "w");
-		//}
-		//else if (fs::exists(fpn) == true)
-		//{
-		//	outFile = fopen(fpn_cchar, "a");
-		//}
-		//fprintf(outFile, printText);
-		//fclose(outFile);
 	}
 	return true;
 }
