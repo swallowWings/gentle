@@ -96,6 +96,72 @@ namespace gentle
             return "";
         }
 
+        public static double[,] calculate2DArryUsingMathFunction(double[,] asc2D,
+            cData.MathFunctionType fType, double expV=1, double nodataValue = -9999)
+        {
+            int ny = asc2D.GetLength(1);
+            int nx = asc2D.GetLength(0);
+            double[,] resultArr = null;
+            resultArr = new double[nx, ny];  
+            ParallelOptions options = new ParallelOptions();
+            options.MaxDegreeOfParallelism = Environment.ProcessorCount;
+            switch (fType)
+            {
+                case cData.MathFunctionType.Pow:
+                    Parallel.For(0, ny, options, delegate (int y)
+                    {
+                        for (int x = 0; x < nx; x++)
+                        {
+                            double v = asc2D[x, y];
+
+                            if (v == nodataValue)
+                            {
+                                resultArr[x, y] = nodataValue;
+                            }
+                            else if (v == 0)
+                            {
+                                resultArr[x, y] = 0;
+                            }
+                            else if (v < 0)
+                            {
+                                string em = string.Format("A value at [{0}, {1}] is less than zero. It cannot be applied. ", x, y);
+                                Console.WriteLine(em);
+                                return;
+                            }
+                            else 
+                            {
+                                resultArr[x, y] = Math.Pow(v, expV);
+                            }
+                        }
+                    });
+                    break;
+                case cData.MathFunctionType.Abs:
+                    Parallel.For(0, ny, options, delegate (int y)
+                    {
+                        for (int x = 0; x < nx; x++)
+                        {
+                            double v = asc2D[x, y];
+                            if (v == nodataValue)
+                            {
+                                resultArr[x, y] = nodataValue;
+                            }
+                            else if (v == 0)
+                            {
+                                resultArr[x, y] = 0;
+                            }
+                            else 
+                            {
+                                resultArr[x, y] =  Math.Abs(v);
+                            }
+
+                        }
+                    });
+                    break;
+            }
+            return resultArr;
+        }
+
+
         public static double[,] calculate2DArryUsing2TermAlgebra(string inOperator, bool is1ASC, bool is2ASC,
             bool is1ASCnodataAsZero, bool is2ASCnodataAsZero,
             double[,] asc1 = null, double[,] asc2 = null, double value1 = 0, double value2 = 0, double nodataValue = -9999)

@@ -65,33 +65,135 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 	if (header.nCols * header.nRows > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = true; }
 	int headerEndingIndex = header.headerEndingLineIndex;
 	int dataStaringIndex = header.dataStartingLineIndex;
+	value_sum = 0;
+	cellCount_notNull = 0;
+	value_max = DBL_MIN;
+	value_min = DBL_MAX;
 	if (isBigSize == false) {
-		//int rcountMax = header.nRows + header.headerEndingLineIndex+1;
 		vector<string> allLinesv = readTextFileToStringVector(fpn_ascRasterFile);
 		int lyMax = (int)allLinesv.size();
-		for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
-			vector<string> values = splitToStringVector(allLinesv[ly], ' ');
-			int y = ly - dataStaringIndex;
-			int nX = (int)values.size();
-			for (int x = 0; x < nX; ++x) {
-				if (isNumeric(values[x]) == true) {
-					valuesFromTL[x][y] = stod(values[x]);
-				}
-				else {
-					valuesFromTL[x][y] = header.nodataValue;
-				}
-				if (valuesFromTL[x][y] != header.nodataValue) {
-					cellCount_notNull++;
-					value_sum = value_sum + valuesFromTL[x][y];
-					if (valuesFromTL[x][y] > value_max) {
-						value_max = valuesFromTL[x][y];
+		// //serial이 parallel 보다 2배 이상 느리다.
+		//for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
+		//	vector<string> values = splitToStringVector(allLinesv[ly], ' ');
+		//	int y = ly - dataStaringIndex;
+		//	int nX = (int)values.size();
+		//	for (int x = 0; x < nX; ++x) {
+		//		if (isNumeric(values[x]) == true) {
+		//			valuesFromTL[x][y] = stod(values[x]);
+		//		}
+		//		else {
+		//			valuesFromTL[x][y] = header.nodataValue;
+		//		}
+		//		if (valuesFromTL[x][y] != header.nodataValue) {
+		//			cellCount_notNull++;
+		//			value_sum = value_sum + valuesFromTL[x][y];
+		//			if (valuesFromTL[x][y] > value_max) {
+		//				value_max = valuesFromTL[x][y];
+		//			}
+		//			if (valuesFromTL[x][y] < value_min) {
+		//				value_min = valuesFromTL[x][y];
+		//			}
+		//		}
+		//	}
+		//}
+
+//#pragma omp parallel
+//		{
+//			double min_local = DBL_MAX;
+//			double sum_local = 0;
+//			int count_local = 0;
+//			double max_local = DBL_MIN;
+//#pragma omp parallel for 
+//			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
+//				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
+//				int y = ly - dataStaringIndex;
+//				int nX = (int)values.size();
+//				for (int x = 0; x < nX; ++x) {
+//					if (isNumeric(values[x]) == true) {
+//						valuesFromTL[x][y] = stod(values[x]);
+//					}
+//					else {
+//						valuesFromTL[x][y] = header.nodataValue;
+//					}
+//					if (valuesFromTL[x][y] != header.nodataValue) {
+//						count_local = count_local + 1;
+//						sum_local = sum_local + valuesFromTL[x][y];
+//						if (valuesFromTL[x][y] > max_local) {
+//							max_local = valuesFromTL[x][y];
+//						}
+//						if (valuesFromTL[x][y] < min_local) {
+//							min_local = valuesFromTL[x][y];
+//						}
+//					}
+//				}
+//			}
+//#pragma omp critical
+//			{
+//				if (value_max < max_local) {
+//					value_max = max_local;
+//				}
+//				if (value_min > min_local) {
+//					value_min = min_local;
+//				}
+//				value_sum = value_sum + sum_local;
+//				cellCount_notNull = cellCount_notNull + count_local;
+//			}
+//		}
+
+		// 병렬이 serial 보다 2배 이상 빠르다. // 가장 좋다.
+		int numThread = 0;
+		numThread = omp_get_max_threads();
+		double* min_local = new double[numThread];
+		double* max_local = new double[numThread];
+		double* sum_local = new double[numThread];
+		double* count_local = new double[numThread];
+#pragma omp parallel
+		{
+			int nth = omp_get_thread_num();
+			min_local[nth] = DBL_MAX;
+			sum_local[nth] = 0;
+			count_local[nth] = 0;
+			max_local[nth] = DBL_MIN;
+#pragma omp for
+			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
+				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
+				int y = ly - dataStaringIndex;
+				int nX = (int)values.size();
+				for (int x = 0; x < nX; ++x) {
+					if (isNumeric(values[x]) == true) {
+						valuesFromTL[x][y] = stod(values[x]);
 					}
-					if (valuesFromTL[x][y] < value_min) {
-						value_min = valuesFromTL[x][y];
+					else {
+						valuesFromTL[x][y] = header.nodataValue;
+					}
+					if (valuesFromTL[x][y] != header.nodataValue) {
+						//cellCount_notNull++;
+						count_local[nth] = count_local[nth] + 1;
+						sum_local[nth] = sum_local[nth] + valuesFromTL[x][y];
+						if (valuesFromTL[x][y] > max_local[nth]) {
+							max_local[nth] = valuesFromTL[x][y];
+						}
+						if (valuesFromTL[x][y] < min_local[nth]) {
+							min_local[nth] = valuesFromTL[x][y];
+						}
 					}
 				}
 			}
 		}
+		for (int i = 0; i < numThread; ++i) {
+			if (value_max < max_local[i]) {
+				value_max = max_local[i];
+			}
+			if (value_min > min_local[i]) {
+				value_min = min_local[i];
+			}
+			value_sum = value_sum + sum_local[i];
+			cellCount_notNull = cellCount_notNull + count_local[i];
+		}
+		delete[] min_local;
+		delete[] max_local;
+		delete[] sum_local;
+		delete[] count_local;
 	}
 	else {
 		int nl = 0;
@@ -126,6 +228,7 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 			nl++;
 		}
 	}
+
 	if (cellCount_notNull > 0) {
 		value_ave = value_sum / cellCount_notNull;
 	}
@@ -138,7 +241,6 @@ ascRasterFile::~ascRasterFile()
 			delete[] valuesFromTL[i];
 		}
 	}
-	//delete[] valuesFromTL;
 }
 
 ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char separator)
@@ -268,7 +370,7 @@ string ascRasterFile::makeHeaderString(int ncols, int nrows, double xll, double 
 void appendTextToTextFile(string fpn, string textToAppend)
 {
 	std::ofstream outfile;
-	outfile.open(fpn, ios::out);
+	outfile.open(fpn, ios::app);
 	outfile << textToAppend;
 	outfile.close();
 }
@@ -511,18 +613,39 @@ vector<string> getFileListInNaturalOrder(string path, string extension)
 	return flist;
 }
 
-//template<int, typename TV>
-//vector <int> getKeys(map<int, TV> inmap)
-//{
-//	vector<int> ks;
-//	map<int, TV>::iterator iter;
-//	map<int, TV>::iterator iter_end;
-//	iter_end = inmap.end();
-//	for (iter = inmap.begin(); iter != iter_end; ++iter) {
-//		ks.push_back(iter->first);
-//	}
-//	return ks;
-//}
+int getTableStateByXmlLineByLine(string aLine, string tableName)
+{
+	string sActive = "<" + trim(tableName) + ">";
+	string sinActive = "</" + trim(tableName) + ">";
+
+	if (sActive == trim(aLine)) {
+		return 1;// activated state
+	} 
+	if (sinActive == trim(aLine)) {
+		return 0;// inactivated state. closed
+	}
+	return -1; 
+}
+
+int getTableStateByXmlLine(string aLine, string tableName)
+{
+	string sActive = "<" + trim(tableName) + ">";
+	string sinActive = "</" + trim(tableName) + ">";
+	int posS = (int)aLine.find(sActive, 0);
+	int posE = (int)aLine.find(sinActive, 0);
+	int state = -1; // this line dose not have table name. it means this table is active.
+	if (posS >= 0) {
+		state = 1; // activated state
+	}
+	if (posE >= 0) {
+		state = 0; // inactivated state
+	}
+	if (posS >= 0 && posE >= 0) {
+		state = 2; // In this line, table is opened, field info. is, and it is closed.
+	}
+	return state;
+}
+
 
 string getValueStringFromXmlLine(string aLine, string fieldName)
 {
@@ -531,7 +654,6 @@ string getValueStringFromXmlLine(string aLine, string fieldName)
 	string strToFind = "<" + fieldName + ">";
 	pos1 = (int)aLine.find(strToFind, 0);
 	if (pos1 >= 0) {
-		//pos1 = aLine.find("<DEMFile>", 0);
 		len_fiedlName = (int)strToFind.length();
 		int pos2 = 0;
 		string strToFind2 = "</" + fieldName + ">";
@@ -649,8 +771,9 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 		for (int y = 0; y < img.height(); ++y) {
 			for (int x = 0; x < img.width(); ++x) {
 				double av = array2D[x][y];
+				rgb_t col;
 				if (av == nodataV) {
-					av = 0;
+					col = { 255, 255, 255 };
 				}
 				else {
 					if (av > rendererMaxV) {
@@ -659,14 +782,8 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 					if (av < 0) {
 						av = 0;
 					}
-				}
-				rgb_t col;
-				if (av == 0) {
-					col = { 255, 255, 255 };
-				}
-				else {
-					int v = (int)(av / rendererMaxV) * 1000.0;
-					col = jet_colormap[v];
+					int v = 380 + (int)(av / rendererMaxV * 610.0);
+					col = hsv_colormap[v];
 				}
 				img.set_pixel(x, y, col.red, col.green, col.blue);
 			}
@@ -971,6 +1088,29 @@ vector<string> splitToStringVector(string stringToBeSplitted, char delimeter, bo
 	return splittedValues;
 }
 
+string * splitToStringArray(string stringToBeSplitted, char delimeter, bool removeEmptyEntry)
+{
+	stringstream ss(stringToBeSplitted);
+	string v;
+	string item;
+	//char * seprator = delimeter.c_str();
+	vector<string> splittedValues;
+	while (getline(ss, item, delimeter)) {
+		v = trim(item);
+		if (removeEmptyEntry == true) {
+			if (v != "") {
+				splittedValues.push_back(v);
+			}
+		}
+		else {
+			splittedValues.push_back(v);
+		}
+	}
+	string* values = new string[splittedValues.size()];
+	copy(splittedValues.begin(), splittedValues.end(), values);
+	return values;
+}
+
 char* stringToCharP(string genericString)
 {
 	std::vector<char> writable(genericString.begin(), genericString.end());
@@ -1015,15 +1155,15 @@ string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
 	if (includeSEC == false) {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
-			time_elasped = pt.Format(_T("%Y%m%d%H%M"));
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M")));
 			break;
 		}
 		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
-			time_elasped = pt.Format(_T("%Y-%m-%d %H:%M"));
+			time_elasped = CT2CA(pt.Format(_T("%Y-%m-%d %H:%M")));
 			break;
 		}
 		case dateTimeFormat::yyyymmdd_HHcolMMcolSS: {
-			time_elasped = pt.Format(_T("%Y%m%d %H:%M"));
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d %H:%M")));
 			break;
 		}
 		}
@@ -1031,15 +1171,15 @@ string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
 	else {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
-			time_elasped = pt.Format(_T("%Y%m%d%H%M%S"));
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M%S")));
 			break;
 		}
 		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
-			time_elasped = pt.Format(_T("%Y-%m-%d %H:%M:%S"));
+			time_elasped = CT2CA(pt.Format(_T("%Y-%m-%d %H:%M:%S")));
 			break;
 		}
 		case dateTimeFormat::yyyymmdd_HHcolMMcolSS: {
-			time_elasped = pt.Format(_T("%Y%m%d %H:%M:%S"));
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d %H:%M:%S")));
 			break;
 		}
 		}
@@ -1107,11 +1247,11 @@ string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat)
 	if (includeSEC ==false) {
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
-			s = t.Format(_T("%Y-%m-%d %H:%M"));
+			s = CT2CA(t.Format(_T("%Y-%m-%d %H:%M")));
 			break;
 		}
 		case dateTimeFormat::yyyymmddHHMMSS: {
-			s = t.Format(_T("%Y%m%d%H%M"));
+			s = CT2CA(t.Format(_T("%Y%m%d%H%M")));
 			break;
 		}
 		}
@@ -1119,11 +1259,11 @@ string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat)
 	else {
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
-			s = t.Format(_T("%Y-%m-%d %H:%M:%S"));
+			s = CT2CA(t.Format(_T("%Y-%m-%d %H:%M:%S")));
 			break;
 		}
 		case dateTimeFormat::yyyymmddHHMMSS: {
-			s = t.Format(_T("%Y%m%d%H:%M:%S"));
+			s = CT2CA(t.Format(_T("%Y%m%d%H:%M:%S")));
 			break;
 		}
 		}

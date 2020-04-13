@@ -26,6 +26,12 @@ namespace gentle
             Sum
         };
 
+        public enum MathFunctionType
+        {
+        Abs,
+        Pow
+        };
+
 
         public static cData.DataType GetDataTypeByName(string inType)
         {

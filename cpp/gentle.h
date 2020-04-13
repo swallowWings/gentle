@@ -41,8 +41,8 @@ typedef struct _ascRasterHeader
 
 typedef struct _cellPosition
 {
-	int x = 0;
-	int y = 0;
+	int xCol = 0;
+	int yRow = 0;
 } cellPosition;
 
 //typedef struct dateTime
@@ -134,6 +134,8 @@ vector<string> getFileList(string path, string extension);
 string getGPUinfo();
 //template<int, typename TV>//template<typename TK, typename TV>
 //vector <int> getKeys(map<int, TV> inmap);
+int getTableStateByXmlLineByLine(string aLine, string tableName);
+int getTableStateByXmlLine(string aLine, string tableName);
 int getVectorIndex(vector<int> inv, int value);
 string getValueStringFromXmlLine(string aLine, string fieldName);
 //char* getPath(char *fpn);
@@ -160,11 +162,18 @@ string replaceText(string inText, string textToFind, string textToRepalce);
 tm secToHHMMSS(long sec);
 tm stringToDateTime(string yyyymmddHHMM);
 tm stringToDateTime2(string yyyymmdd_HHcolonMM);
-vector<double> splitToDoubleVector(string strToSplit, const char delimeter, bool removeEmptyEntry = true);
-vector<float> splitToFloatVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry=true);
-vector<double> splitToDoubleVector(string strToSplit, string delimeter, bool removeEmptyEntry = true);
-vector<int> splitToIntVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry = true);
-vector<string> splitToStringVector(string stringToBeSplitted, char delimeter, bool removeEmptyEntry = true);
+vector<double> splitToDoubleVector(string strToSplit, 
+	const char delimeter, bool removeEmptyEntry = true);
+vector<float> splitToFloatVector(string stringToBeSplitted, 
+	char delimeter, bool removeEmptyEntry=true);
+vector<double> splitToDoubleVector(string strToSplit,
+	string delimeter, bool removeEmptyEntry = true);
+vector<int> splitToIntVector(string stringToBeSplitted, 
+	char delimeter, bool removeEmptyEntry = true);
+vector<string> splitToStringVector(string stringToBeSplitted, 
+	char delimeter, bool removeEmptyEntry = true);
+string* splitToStringArray(string stringToBeSplitted,
+	char delimeter, bool removeEmptyEntry = true);
 char* stringToCharP(string c_charP);
 
 string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
@@ -188,7 +197,6 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 
 class ascRasterFile
 {
-
 private:
 	//const int BigSizeThreshold = 200000000;//2억개 기준
 	char separator = { ' ' };
