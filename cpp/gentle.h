@@ -129,6 +129,7 @@ string forString(double value, int precision);
 
 CPUsInfo getCPUinfo();
 version getCurrentFileVersion();
+string getCurrentExeFilePathName();
 vector<string> getFileListInNaturalOrder(string path, string extension);
 vector<string> getFileList(string path, string extension);
 string getGPUinfo();
@@ -174,7 +175,7 @@ vector<string> splitToStringVector(string stringToBeSplitted,
 	char delimeter, bool removeEmptyEntry = true);
 string* splitToStringArray(string stringToBeSplitted,
 	char delimeter, bool removeEmptyEntry = true);
-char* stringToCharP(string c_charP);
+char* stringToCharP(string inString);
 
 string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
 	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat);

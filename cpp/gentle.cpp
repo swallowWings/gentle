@@ -501,6 +501,13 @@ CPUsInfo getCPUinfo()
 }
 
 
+string getCurrentExeFilePathName()
+{
+	TCHAR fpn_exe[MAX_PATH];
+	GetModuleFileName(NULL, fpn_exe, sizeof(fpn_exe));
+	return fpn_exe;
+}
+
 version getCurrentFileVersion()
 {
 	TCHAR fpn_exe[MAX_PATH];
@@ -1111,11 +1118,11 @@ string * splitToStringArray(string stringToBeSplitted, char delimeter, bool remo
 	return values;
 }
 
-char* stringToCharP(string genericString)
+char* stringToCharP(string inString)
 {
-	std::vector<char> writable(genericString.begin(), genericString.end());
-	writable.push_back('\0');
-	return &writable[0];
+	std::vector<char> cpv(inString.begin(), inString.end());
+	cpv.push_back('\0');
+	return &cpv[0];
 }
 
 tm stringToDateTime(string yyyymmddHHMM) // 201711282310
