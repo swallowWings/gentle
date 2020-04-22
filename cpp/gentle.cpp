@@ -1125,6 +1125,20 @@ char* stringToCharP(string inString)
 	return &cpv[0];
 }
 
+
+char** stringVectorToCharPP(vector<string> inStrV)
+{
+	vector <char*> cpv(inStrV.size());
+	int vs = inStrV.size();
+	char** r = new char* [vs];
+	for (unsigned i = 0; i < vs; ++i) {
+		int len = strlen(inStrV[i].c_str())+1;
+		r[i] = (char*)malloc(sizeof(char) * len);
+		strcpy(r[i], inStrV[i].c_str());
+	}
+	return r;
+}
+
 tm stringToDateTime(string yyyymmddHHMM) // 201711282310
 {
 	tm t;

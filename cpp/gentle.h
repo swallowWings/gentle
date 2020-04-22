@@ -176,6 +176,7 @@ vector<string> splitToStringVector(string stringToBeSplitted,
 string* splitToStringArray(string stringToBeSplitted,
 	char delimeter, bool removeEmptyEntry = true);
 char* stringToCharP(string inString);
+char** stringVectorToCharPP(vector<string> inStrV);
 
 string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
 	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat);
