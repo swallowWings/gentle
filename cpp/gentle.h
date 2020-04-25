@@ -113,10 +113,18 @@ enum class rendererType
 
 enum class dateTimeFormat
 {
-	yyyymmdd_HHcolMMcolSS, // 20200324 15:30
-	yyyy_mm_dd_HHcolMMcolSS, // 2020-03-24 15:30
+	yyyymmdd__HHcolMMcolSS, // 20200324 15:30
+	yyyy_mm_dd__HHcolMMcolSS, // 2020-03-24 15:30
 	yyyymmddHHMMSS //202003241530
 };
+
+enum class timeUnitToShow
+{
+	toSecond, // 초까지 표시
+	toMinute, //분 까지 표시
+	toHour // 시간까지 표시
+};
+
 
 void appendTextToTextFile(string fpn, string textToAppend);
 
@@ -125,7 +133,7 @@ int confirmDeleteFile(string filePathNames);
 int confirmDeleteFiles(vector<string> filePathNames);
 
 // formatted numeric string
-string forString(double value, int precision); 
+string toStrWithPrecision(double value, int precision); 
 
 CPUsInfo getCPUinfo();
 version getCurrentFileVersion();
@@ -139,7 +147,6 @@ int getTableStateByXmlLineByLine(string aLine, string tableName);
 int getTableStateByXmlLine(string aLine, string tableName);
 int getVectorIndex(vector<int> inv, int value);
 string getValueStringFromXmlLine(string aLine, string fieldName);
-//char* getPath(char *fpn);
 
 bool isNumeric(string instr);
 bool isNumericDbl(string instr);
@@ -162,7 +169,7 @@ string replaceText(string inText, string textToFind, string textToRepalce);
 
 tm secToHHMMSS(long sec);
 tm stringToDateTime(string yyyymmddHHMM);
-tm stringToDateTime2(string yyyymmdd_HHcolonMM);
+tm stringToDateTime2(string yyyy_mm_dd__HHcolonMM);
 vector<double> splitToDoubleVector(string strToSplit, 
 	const char delimeter, bool removeEmptyEntry = true);
 vector<float> splitToFloatVector(string stringToBeSplitted, 
@@ -177,9 +184,14 @@ string* splitToStringArray(string stringToBeSplitted,
 	char delimeter, bool removeEmptyEntry = true);
 char* stringToCharP(string inString);
 char** stringVectorToCharPP(vector<string> inStrV);
-
-string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
-	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat);
+// 이 함수의 기준시간 포맷은 yyyymmddHHMM
+string timeElaspedToDateTimeFormat(string startTime_yyyymmddHHMM,
+	int elaspedTimeSec, timeUnitToShow unitToShow, 
+	dateTimeFormat tformat);
+// 이 함수의 기준시간 포맷은 yyyy-mm-dd HH:MM
+string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
+	int elaspedTimeSec, timeUnitToShow unitToShow, 
+	dateTimeFormat tformat);
 char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat);
 string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat);
 string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat);
@@ -246,5 +258,17 @@ inline std::string trimR(std::string& str)
 {
 	str.erase(str.find_last_not_of(' ') + 1);         //surfixing spaces
 	return str;
+}
+
+inline string getYYYYMMfromYYYYMMddHHmm
+(string INPUTyyyyMMddHHmm)
+{
+	return INPUTyyyyMMddHHmm.substr(0, 6);
+}
+
+inline string getYYYYMMddHHfromYYYYMMddHHmm
+(string INPUTyyyyMMddHHmm)
+{
+	return INPUTyyyyMMddHHmm.substr(0, 10);
 }
 

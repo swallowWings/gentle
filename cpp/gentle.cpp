@@ -457,13 +457,14 @@ int confirmDeleteFile(string filePathNames)
 }
 
 
-string forString(double value, int precision)
+string toStrWithPrecision(double value, int precision)
 {
 	stringstream stream;
 	stream << std::fixed << std::setprecision(precision) << value;
 	string s = stream.str();
 	return s;
 }
+
 
 CPUsInfo getCPUinfo()
 {
@@ -555,7 +556,7 @@ version getCurrentFileVersion()
 					tm ltm;
 					localtime_s(&ltm, &buf.st_mtime);
 					sprintf_s(ver.LastWrittenTime, timeToString(ltm,
-						false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS).c_str());
+						false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS).c_str());
 				}
 			}
 		}
@@ -1162,10 +1163,22 @@ tm stringToDateTime2(string yyyy_mm_dd__HHcolonMM) // 2017-11-28 23:10, 0123-56-
 }
 
 // yyyymmddHHMMSS
-string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
-	int elaspedTimeSec, bool includeSEC, dateTimeFormat tformat)
+string timeElaspedToDateTimeFormat(string startTime_yyyymmddHHMM,
+	int elaspedTimeSec, timeUnitToShow unitToShow, dateTimeFormat tformat)
 {
-	string startTime = startTime_yyyymmdd_HHcolonMM;
+	tm tms = stringToDateTime(startTime_yyyymmddHHMM);
+	string startTime=timeToString(tms, false, 
+		dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
+	string t_elasped;
+	t_elasped = timeElaspedToDateTimeFormat2(startTime,
+		elaspedTimeSec, unitToShow, tformat);
+	return t_elasped;
+}
+
+string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
+	int elaspedTimeSec, timeUnitToShow unitToShow, dateTimeFormat tformat)
+{
+	string startTime = startTime_yyyy_mm_dd__HHclnMM;
 	tm tms = stringToDateTime2(startTime);
 	COleDateTime pt(tms.tm_year, tms.tm_mon, tms.tm_mday, tms.tm_hour, tms.tm_min, 0);
 	COleDateTimeSpan SpendTime;
@@ -1173,37 +1186,58 @@ string timeElaspedToDateTimeFormat(string startTime_yyyymmdd_HHcolonMM,
 	pt = pt + SpendTime;
 	string time_elasped;
 
-	if (includeSEC == false) {
-		switch (tformat) {
-		case dateTimeFormat::yyyymmddHHMMSS: {
-			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M")));
-			break;
-		}
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
-			time_elasped = CT2CA(pt.Format(_T("%Y-%m-%d %H:%M")));
-			break;
-		}
-		case dateTimeFormat::yyyymmdd_HHcolMMcolSS: {
-			time_elasped = CT2CA(pt.Format(_T("%Y%m%d %H:%M")));
-			break;
-		}
-		}
-	}
-	else {
+	switch (unitToShow)
+	{
+	case timeUnitToShow::toSecond:
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M%S")));
 			break;
 		}
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y-%m-%d %H:%M:%S")));
 			break;
 		}
-		case dateTimeFormat::yyyymmdd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyymmdd__HHcolMMcolSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d %H:%M:%S")));
 			break;
 		}
 		}
+		break;
+	case timeUnitToShow::toMinute:
+		switch (tformat) {
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M")));
+			break;
+		}
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
+			time_elasped = CT2CA(pt.Format(_T("%Y-%m-%d %H:%M")));
+			break;
+		}
+		case dateTimeFormat::yyyymmdd__HHcolMMcolSS: {
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d %H:%M")));
+			break;
+		}
+		}
+		break;
+	case timeUnitToShow::toHour:
+		break;
+		switch (tformat) {
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H")));
+			break;
+		}
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
+			time_elasped = CT2CA(pt.Format(_T("%Y-%m-%d %H")));
+			break;
+		}
+		case dateTimeFormat::yyyymmdd__HHcolMMcolSS: {
+			time_elasped = CT2CA(pt.Format(_T("%Y%m%d %H")));
+			break;
+		}
+		}
+	default:
+		break;
 	}
 	return time_elasped;
 }
@@ -1214,7 +1248,7 @@ char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat)
 	static char s[20];
 	if (includeSEC ==false) {
 		switch (tformat) {
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
 				t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
 				t->tm_hour, t->tm_min);
@@ -1224,7 +1258,7 @@ char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat)
 	}
 	else {
 		switch (tformat) {
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
 				t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
 				t->tm_hour, t->tm_min, t->tm_sec);
@@ -1240,7 +1274,7 @@ string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat)
 	static char s[20];
 	if (includeSEC ==false) {
 		switch (tformat) {
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
 				t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
 				t.tm_hour, t.tm_min);
@@ -1250,7 +1284,7 @@ string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat)
 	}
 	else {
 		switch (tformat) {
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
 				t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
 				t.tm_hour, t.tm_min, t.tm_sec);
@@ -1267,7 +1301,7 @@ string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat)
 	string s;
 	if (includeSEC ==false) {
 		switch (tformat) {
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			s = CT2CA(t.Format(_T("%Y-%m-%d %H:%M")));
 			break;
 		}
@@ -1279,7 +1313,7 @@ string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat)
 	}
 	else {
 		switch (tformat) {
-		case dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS: {
+		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			s = CT2CA(t.Format(_T("%Y-%m-%d %H:%M:%S")));
 			break;
 		}
@@ -1321,7 +1355,7 @@ bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintCon
 		tm ltm;
 		localtime_s(&ltm, &now);
 		string nows = timeToString(ltm, 
-			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
@@ -1344,7 +1378,7 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 		tm ltm;
 		localtime_s(&ltm, &now);
 		string nows = timeToString(ltm,
-			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
@@ -1369,7 +1403,7 @@ bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConso
 		tm ltm;
 		localtime_s(&ltm, &now);
 		string nows = timeToString(ltm,
-			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
@@ -1395,7 +1429,7 @@ bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsol
 		tm ltm;
 		localtime_s(&ltm, &now);
 		string nows = timeToString(ltm, 
-			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
 		//FILE* outFile;
@@ -1432,7 +1466,7 @@ bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 		tm ltm;
 		localtime_s(&ltm, &now);
 		string nows = timeToString(ltm,
-			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
 	}
@@ -1456,7 +1490,7 @@ bool writeLog(fs::path fpn, string printText, int bprintFile, int bprintConsole)
 		tm ltm;
 		localtime_s(&ltm, &now);
 		string nows = timeToString(ltm, 
-			false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
 	}
@@ -1486,12 +1520,12 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 		for (int nr = 0; nr < ny; nr++) {
 			for (int nc = 0; nc < nx; nc++) {
 				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-					string aStr = forString(array2D[nc][nr], 0);
+					string aStr = toStrWithPrecision(array2D[nc][nr], 0);
 					aStr += " ";
 					strALL += aStr;
 				}
 				else {
-					string aStr = forString(array2D[nc][nr], precision);
+					string aStr = toStrWithPrecision(array2D[nc][nr], precision);
 					aStr += " ";
 					strALL += aStr;
 				}
@@ -1506,12 +1540,12 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 		for (int nr = 0; nr < ny; nr++) {
 			for (int nc = 0; nc < nx; nc++) {
 				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-					string aStr = forString(array2D[nc][nr], 0);
+					string aStr = toStrWithPrecision(array2D[nc][nr], 0);
 					aStr += " ";
 					strALine += aStr;
 				}
 				else {
-					string aStr = forString(array2D[nc][nr], precision);
+					string aStr = toStrWithPrecision(array2D[nc][nr], precision);
 					aStr += " ";
 					strALine += aStr;
 				}
