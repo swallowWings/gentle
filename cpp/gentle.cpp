@@ -926,7 +926,7 @@ vector<float> readTextFileToFloatVector(string fpn)
 
 string readTextFileToString(string fpn)
 {
-	std::ifstream ifs("myfile.txt");
+	std::ifstream ifs(fpn);
 	std::string content((std::istreambuf_iterator<char>(ifs)),
 		(std::istreambuf_iterator<char>()));
 	return content;
@@ -1182,13 +1182,17 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 	tm tms = stringToDateTime2(startTime);
 	COleDateTime pt(tms.tm_year, tms.tm_mon, tms.tm_mday, tms.tm_hour, tms.tm_min, 0);
 	COleDateTimeSpan SpendTime;
-	SpendTime.SetDateTimeSpan(0, 0, 0, elaspedTimeSec);
-	pt = pt + SpendTime;
+	int et = abs(elaspedTimeSec);
+	SpendTime.SetDateTimeSpan(0, 0, 0, et);
+	if (elaspedTimeSec > 0) {
+		pt = pt + SpendTime;
+	}
+	else {
+		pt= pt - SpendTime;
+	}	
 	string time_elasped;
-
-	switch (unitToShow)
-	{
-	case timeUnitToShow::toSecond:
+	switch (unitToShow) {
+	case timeUnitToShow::toSecond: {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M%S")));
@@ -1204,7 +1208,8 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 		}
 		}
 		break;
-	case timeUnitToShow::toMinute:
+	}
+	case timeUnitToShow::toMinute: {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M")));
@@ -1220,8 +1225,8 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 		}
 		}
 		break;
-	case timeUnitToShow::toHour:
-		break;
+	}
+	case timeUnitToShow::toHour: {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H")));
@@ -1236,8 +1241,7 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 			break;
 		}
 		}
-	default:
-		break;
+	}
 	}
 	return time_elasped;
 }
@@ -1276,7 +1280,13 @@ string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat)
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
-				t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
+				t.tm_year, t.tm_mon, t.tm_mday,
+				t.tm_hour, t.tm_min);
+			break;
+		}
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			sprintf_s(s, "%04d%02d%02d%02d%02d",
+				t.tm_year, t.tm_mon, t.tm_mday,
 				t.tm_hour, t.tm_min);
 			break;
 		}
@@ -1286,7 +1296,13 @@ string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat)
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
-				t.tm_year + 1900, t.tm_mon + 1, t.tm_mday,
+				t.tm_year, t.tm_mon, t.tm_mday,
+				t.tm_hour, t.tm_min, t.tm_sec);
+			break;
+		}
+		case dateTimeFormat::yyyymmddHHMMSS: {
+			sprintf_s(s, "%04d%02d%02d%02d%02d%02d",
+				t.tm_year, t.tm_mon, t.tm_mday,
 				t.tm_hour, t.tm_min, t.tm_sec);
 			break;
 		}
