@@ -373,6 +373,9 @@ void appendTextToTextFile(string fpn, string textToAppend)
 	outfile.open(fpn, ios::app);
 	outfile << textToAppend;
 	outfile.close();
+	//FILE* fp = fopen(fpn.c_str(), "a");
+	//fprintf(fp, textToAppend.c_str());
+	//fclose(fp);
 }
 
 bool compareNaturalOrder(const std::string& a, const std::string& b) 
@@ -457,12 +460,28 @@ int confirmDeleteFile(string filePathNames)
 }
 
 
-string toStrWithPrecision(double value, int precision)
+string dtos(double value, int precision)
+{
+	char vchar[20];
+	char fchar[10];
+	sprintf(fchar, "%%.%df", precision);
+	sprintf(vchar, fchar, value);
+	return vchar;
+}
+
+string dtos2(double value, int precision)
 {
 	stringstream stream;
 	stream << std::fixed << std::setprecision(precision) << value;
 	string s = stream.str();
 	return s;
+}
+
+string itos(double value)
+{
+	char vchar[20];
+	sprintf(vchar, "%d", value);
+	return vchar;
 }
 
 
@@ -553,9 +572,10 @@ version getCurrentFileVersion()
 					//printf("\tTime Creation     : %s\n", timeToString(localtime(&buf.st_ctime)));
 					//printf("\tTime Last Written : %s\n", timeToString(localtime(&buf.st_mtime)));
 					//printf("\tTime Last Access  : %s\n", timeToString(localtime(&buf.st_atime)));
-					tm ltm;
-					localtime_s(&ltm, &buf.st_mtime);
-					sprintf_s(ver.LastWrittenTime, timeToString(ltm,
+					//tm ltm;
+					//localtime_s(&ltm, &buf.st_mtime);
+					COleDateTime tnow = COleDateTime::GetCurrentTime();
+					sprintf_s(ver.LastWrittenTime, timeToString(tnow,
 						false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS).c_str());
 				}
 			}
@@ -713,27 +733,113 @@ bool isNumeric(string instr)
 	else {
 		return true;
 	}
-	//if (atof(instr.c_str()) != 0 || instr.compare("0") == 0) { 
-	//	return true; 
-	//}
-	//return atoi(instr.c_str()) != 0 || instr.compare("0") == 0;
 }
 
+// 빠르다. 2020.05.06. 최
 void makeASCTextFile(string fpn, string allHeader, double** array2D,
 	int arrayLength_x, int arrayLength_y,
 	int precision, int nodataValue)
 {
 	fs::path fpn_out = fs::path(fpn);
 	std::ofstream outfile;
-	if (fs::exists(fpn_out) == true) {
-		std::remove(fpn.c_str());
-	}
 	outfile.open(fpn_out, ios::out);
 	outfile << allHeader << "\n";
+	int isBigSize = -1;
+	//int BigSizeThreshold = 200000000; //2억개 기준
+	if (arrayLength_x * arrayLength_y > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
+	string formatString = "%." + to_string(precision) + "f ";
+	const char* formatStr = formatString.c_str();
+	//char* aaa= (char*)malloc(sizeof(char) * 10 * arrayLength_x + 1);
+	if (isBigSize == -1) {
+		string allLInes = "";
+		for (int nr = 0; nr < arrayLength_y; nr++) {
+			string aLineEle = "";
+			for (int nc = 0; nc < arrayLength_x; nc++) {
+				char vchar[20];
+				if (array2D[nc][nr] == nodataValue
+					|| array2D[nc][nr] == 0) {
+					sprintf(vchar, "%d ", (int)array2D[nc][nr]);
+				}
+				else {
+					sprintf(vchar, formatStr, array2D[nc][nr]);
+				}
+				aLineEle += vchar;
+			}
+			allLInes += aLineEle + '\n';
+		}
+		outfile << allLInes;
+	}
+	else {
+		for (int nr = 0; nr < arrayLength_y; nr++) {
+			string aLineEle = "";
+			for (int nc = 0; nc < arrayLength_x; nc++) {
+				char s1[20];
+				if (array2D[nc][nr] == nodataValue
+					|| array2D[nc][nr] == 0) {
+					sprintf(s1, "%d ", array2D[nc][nr]);
+				}
+				else {
+					sprintf(s1, formatStr, array2D[nc][nr]);
+				}
+				aLineEle += s1;
+			}
+			aLineEle += "\n";
+			outfile << aLineEle;
+		}
+	}
 	outfile.close();
-	writeTwoDimData(fpn, array2D, arrayLength_x, arrayLength_y,
-		precision, nodataValue);
 }
+
+//// 느리다. 2020.05.06. 최
+//void makeASCTextFile2(string fpn, string allHeader, double** array2D,
+//	int arrayLength_x, int arrayLength_y,
+//	int precision, int nodataValue)
+//{
+//	fs::path fpn_out = fs::path(fpn);
+//	std::ofstream outfile;
+//	outfile.open(fpn_out, ios::out);
+//	outfile << allHeader << "\n";
+//	int isBigSize = -1;
+//	//int BigSizeThreshold = 200000000; //2억개 기준
+//	if (arrayLength_x * arrayLength_y > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
+//	if (isBigSize == -1) {
+//		string strALL = "";
+//		for (int nr = 0; nr < arrayLength_y; nr++) {
+//			string aLineEle = "";
+//			for (int nc = 0; nc < arrayLength_x; nc++) {
+//				string svalue = "";
+//				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
+//					svalue = dtos2(array2D[nc][nr], 0);
+//					aLineEle += svalue+" ";
+//				}
+//				else {
+//					svalue = dtos2(array2D[nc][nr],precision);
+//					aLineEle += svalue + " ";
+//				}				
+//			}
+//			strALL += aLineEle + '\n';
+//		}
+//		outfile << strALL;
+//	}
+//	else {
+//		for (int nr = 0; nr < arrayLength_y; nr++) {
+//			string aLineEle = "";
+//			for (int nc = 0; nc < arrayLength_x; nc++) {
+//				string svalue = "";
+//				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
+//					svalue = dtos2(array2D[nc][nr], 0);
+//				}
+//				else {
+//					svalue = dtos2(array2D[nc][nr], precision);
+//				}
+//				aLineEle += svalue;
+//			}
+//			aLineEle += "\n";
+//			outfile << aLineEle;
+//		}
+//	}
+//	outfile.close();
+//}
 
 
 void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
@@ -1254,8 +1360,9 @@ char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat)
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
-				t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+				t->tm_year, t->tm_mon + 1, t->tm_mday,
 				t->tm_hour, t->tm_min);
+			// t로 local time이 들어오면 t.tm_year+1900 해야 한다.
 			break;
 		}
 		}
@@ -1264,7 +1371,7 @@ char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat)
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
-				t->tm_year + 1900, t->tm_mon + 1, t->tm_mday,
+				t->tm_year, t->tm_mon + 1, t->tm_mday,
 				t->tm_hour, t->tm_min, t->tm_sec);
 			break;
 		}
@@ -1282,6 +1389,7 @@ string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat)
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
 				t.tm_year, t.tm_mon, t.tm_mday,
 				t.tm_hour, t.tm_min);
+			// t로 local time이 들어오면 t.tm_year+1900 해야 한다.
 			break;
 		}
 		case dateTimeFormat::yyyymmddHHMMSS: {
@@ -1366,11 +1474,12 @@ bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintCon
 		printf(printText);
 	}
 	if (bprintFile > 0) {
-		time_t now = time(0);
-		//tm *ltm = localtime(&now);
-		tm ltm;
-		localtime_s(&ltm, &now);
-		string nows = timeToString(ltm, 
+		//time_t now = time(0);
+		////tm *ltm = localtime(&now);
+		//tm ltm;
+		//localtime_s(&ltm, &now);
+		COleDateTime tnow = COleDateTime::GetCurrentTime();
+		string nows = timeToString(tnow, 
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
@@ -1390,10 +1499,11 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 		printf(printText);
 	}
 	if (bprintFile > 0)	{
-		time_t now = time(0);
-		tm ltm;
-		localtime_s(&ltm, &now);
-		string nows = timeToString(ltm,
+		//time_t now = time(0);
+		//tm ltm;
+		//localtime_s(&ltm, &now);
+		COleDateTime tnow = COleDateTime::GetCurrentTime();
+		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
@@ -1415,10 +1525,11 @@ bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConso
 		cout << printText;
 	}
 	if (bprintFile > 0) {
-		time_t now = time(0);
-		tm ltm;
-		localtime_s(&ltm, &now);
-		string nows = timeToString(ltm,
+		//time_t now = time(0);
+		//tm ltm;
+		//localtime_s(&ltm, &now);
+		COleDateTime tnow = COleDateTime::GetCurrentTime();
+		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		std::ofstream outfile;
 		outfile.open(fpn, ios::out);
@@ -1441,10 +1552,11 @@ bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsol
 		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
-		time_t now = time(0);
-		tm ltm;
-		localtime_s(&ltm, &now);
-		string nows = timeToString(ltm, 
+		//time_t now = time(0);
+		//tm ltm;
+		//localtime_s(&ltm, &now);
+		COleDateTime tnow = COleDateTime::GetCurrentTime();
+		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
@@ -1478,10 +1590,11 @@ bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
-		time_t now = time(0);
-		tm ltm;
-		localtime_s(&ltm, &now);
-		string nows = timeToString(ltm,
+		//time_t now = time(0);
+		//tm ltm;
+		//localtime_s(&ltm, &now);
+		COleDateTime tnow = COleDateTime::GetCurrentTime();
+		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
@@ -1502,10 +1615,11 @@ bool writeLog(fs::path fpn, string printText, int bprintFile, int bprintConsole)
 		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
-		time_t now = time(0);
-		tm ltm;
-		localtime_s(&ltm, &now);
-		string nows = timeToString(ltm, 
+		//time_t now = time(0);
+		//tm ltm;
+		//localtime_s(&ltm, &now);
+		COleDateTime tnow = COleDateTime::GetCurrentTime();
+		string nows = timeToString(tnow, 
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
@@ -1522,56 +1636,103 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 	int isBigSize = -1;
 	//int BigSizeThreshold = 200000000; //2억개 기준
 	if (nx * ny > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
-
 	fs::path fpn_out = fs::path(fpn);
 	std::ofstream outfile;
-	//if (fs::exists(fpn_out) == false) {
-	//	outfile.open(fpn_out, ios::out);
-	//}
-	//else if (fs::exists(fpn_out) == true) {
 	outfile.open(fpn_out, ios::app);
-	//}
+	string formatString = "%." + to_string(precision) + "f ";
+	const char* formatStr = formatString.c_str();
 	if (isBigSize == -1) {
 		string strALL = "";
 		for (int nr = 0; nr < ny; nr++) {
+			string aLineEle = "";
 			for (int nc = 0; nc < nx; nc++) {
+				char s1[10];
 				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-					string aStr = toStrWithPrecision(array2D[nc][nr], 0);
-					aStr += " ";
-					strALL += aStr;
+					sprintf(s1, "%g ", array2D[nc][nr]);
 				}
 				else {
-					string aStr = toStrWithPrecision(array2D[nc][nr], precision);
-					aStr += " ";
-					strALL += aStr;
+					sprintf(s1, formatStr, array2D[nc][nr]);
 				}
+				aLineEle += s1;
 			}
-			strALL += "\n";
+			strALL += aLineEle+ '\n';
 		}
 		outfile << strALL;
-		outfile.close();
 	}
 	else {
-		string strALine = "";
 		for (int nr = 0; nr < ny; nr++) {
-			for (int nc = 0; nc < nx; nc++) {
+			string strALine = "";
+			string aLineEle = "";
+			for (int nc = 0; nc < nx; nc++) {				
+				char s1[20];
 				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-					string aStr = toStrWithPrecision(array2D[nc][nr], 0);
-					aStr += " ";
-					strALine += aStr;
+					sprintf(s1, "%g ", array2D[nc][nr]);
 				}
 				else {
-					string aStr = toStrWithPrecision(array2D[nc][nr], precision);
-					aStr += " ";
-					strALine += aStr;
+					sprintf(s1, formatStr, array2D[nc][nr]);
 				}
+				aLineEle += s1;
 			}
-			strALine += "\n";
+			strALine = aLineEle + "\n";
 			outfile << strALine;
 		}
-		outfile.close();
 	}
+	outfile.close();
 }
+
+// 느리다. 2020.05.06. 최
+//void writeTwoDimData2(string fpn, double** array2D, int arrayLength_x, int arrayLength_y,
+//	int precision, int nodataValue)
+//{
+//	int nx = arrayLength_x;
+//	int ny = arrayLength_y;
+//	int isBigSize = -1;
+//	//int BigSizeThreshold = 200000000; //2억개 기준
+//	if (nx * ny > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
+//	fs::path fpn_out = fs::path(fpn);
+//	std::ofstream outfile;
+//	outfile.open(fpn_out, ios::app);
+//	if (isBigSize == -1) {
+//		string strALL = "";
+//		for (int nr = 0; nr < ny; nr++) {
+//			for (int nc = 0; nc < nx; nc++) {
+//				string aStr = "";
+//				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
+//					aStr = dtos2(array2D[nc][nr], 0);
+//					aStr += " ";
+//				}
+//				else {
+//					aStr = dtos2(array2D[nc][nr], precision);
+//					aStr += " ";
+//				}
+//				strALL += aStr;
+//			}
+//			strALL += "\n";
+//		}
+//		outfile << strALL;
+//		outfile.close();
+//	}
+//	else {
+//		string strALine = "";
+//		for (int nr = 0; nr < ny; nr++) {
+//			for (int nc = 0; nc < nx; nc++) {
+//				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
+//					string aStr = dtos(array2D[nc][nr], 0);
+//					aStr += " ";
+//					strALine += aStr;
+//				}
+//				else {
+//					string aStr = dtos(array2D[nc][nr], precision);
+//					aStr += " ";
+//					strALine += aStr;
+//				}
+//			}
+//			strALine += "\n";
+//			outfile << strALine;
+//		}
+//		outfile.close();
+//	}
+//}
 
 
 

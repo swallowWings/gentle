@@ -133,7 +133,10 @@ int confirmDeleteFile(string filePathNames);
 int confirmDeleteFiles(vector<string> filePathNames);
 
 // formatted numeric string
-string toStrWithPrecision(double value, int precision); 
+string dtos(double value, int precision); 
+string dtos2(double value, int precision);
+string itos(double value);
+//string itos(int value);
 
 CPUsInfo getCPUinfo();
 version getCurrentFileVersion();
@@ -155,6 +158,10 @@ bool isNumericInt(string instr);
 void makeASCTextFile(string fpn, string allHeader, double** array2D,
 	int arrayLength_x, int arrayLength_y,
 	int precision, int nodataValue);
+//// 느리다. 2020.05.06. 최
+//void makeASCTextFile2(string fpn, string allHeader, double** array2D,
+//	int arrayLength_x, int arrayLength_y,
+//	int precision, int nodataValue);
 void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 	double** array2D,
 	int colxNum, int rowyNum, rendererType rt,
@@ -184,6 +191,7 @@ string* splitToStringArray(string stringToBeSplitted,
 	char delimeter, bool removeEmptyEntry = true);
 char* stringToCharP(string inString);
 char** stringVectorToCharPP(vector<string> inStrV);
+
 // 이 함수의 기준시간 포맷은 yyyymmddHHMM
 string timeElaspedToDateTimeFormat(string startTime_yyyymmddHHMM,
 	int elaspedTimeSec, timeUnitToShow unitToShow, 
@@ -207,7 +215,9 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConsole);
 void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayLength_y,
 	int precision, int nodataValue);
-
+// 느리다. 2020.05.06. 최
+//void writeTwoDimData2(string fpn, double** array2D, int arrayLength_x, int arrayLength_y,
+//	int precision, int nodataValue);
 
 class ascRasterFile
 {
