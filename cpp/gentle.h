@@ -2,12 +2,10 @@
 #include <iostream>
 #include <stdio.h>
 #include <map>
-//#include <list>
 #include<fstream>
 #include <filesystem>
 #include<ATLComTime.h>
 #include <windows.h>
-//#include <string>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -120,11 +118,10 @@ enum class dateTimeFormat
 
 enum class timeUnitToShow
 {
-	toSecond, // 초까지 표시
-	toMinute, //분 까지 표시
-	toHour // 시간까지 표시
+	toS, // 초까지 표시
+	toM, //분 까지 표시
+	toH // 시간까지 표시
 };
-
 
 void appendTextToTextFile(string fpn, string textToAppend);
 
@@ -133,10 +130,9 @@ int confirmDeleteFile(string filePathNames);
 int confirmDeleteFiles(vector<string> filePathNames);
 
 // formatted numeric string
-string dtos(double value, int precision); 
-string dtos2(double value, int precision);
-string itos(double value);
-//string itos(int value);
+string dtos(double value, int precision); //빠르다
+string dtos2(double value, int precision);//느리다
+//string itos(double value);
 
 CPUsInfo getCPUinfo();
 version getCurrentFileVersion();
@@ -144,8 +140,6 @@ string getCurrentExeFilePathName();
 vector<string> getFileListInNaturalOrder(string path, string extension);
 vector<string> getFileList(string path, string extension);
 string getGPUinfo();
-//template<int, typename TV>//template<typename TK, typename TV>
-//vector <int> getKeys(map<int, TV> inmap);
 int getTableStateByXmlLineByLine(string aLine, string tableName);
 int getTableStateByXmlLine(string aLine, string tableName);
 int getVectorIndex(vector<int> inv, int value);
@@ -158,10 +152,6 @@ bool isNumericInt(string instr);
 void makeASCTextFile(string fpn, string allHeader, double** array2D,
 	int arrayLength_x, int arrayLength_y,
 	int precision, int nodataValue);
-//// 느리다. 2020.05.06. 최
-//void makeASCTextFile2(string fpn, string allHeader, double** array2D,
-//	int arrayLength_x, int arrayLength_y,
-//	int precision, int nodataValue);
 void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 	double** array2D,
 	int colxNum, int rowyNum, rendererType rt,
@@ -215,9 +205,6 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConsole);
 void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayLength_y,
 	int precision, int nodataValue);
-// 느리다. 2020.05.06. 최
-//void writeTwoDimData2(string fpn, double** array2D, int arrayLength_x, int arrayLength_y,
-//	int precision, int nodataValue);
 
 class ascRasterFile
 {
@@ -227,10 +214,7 @@ private:
 
 public:
 	bool disposed = false;
-	// Instantiate a SafeHandle instance.
-//SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
 	string linesForHeader[8];
-	//double dataValueOri;
 	ascRasterHeader header;
 	string headerStringAll;
 	double** valuesFromTL;

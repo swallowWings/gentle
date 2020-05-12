@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <sstream>
 #include <omp.h>
-//#include <list>
 #include<map>
 #include <time.h>
 #include<ATLComTime.h>
@@ -19,7 +18,6 @@
 
 #include "gentle.h"
 
-//#pragma comment(lib,"version.lib")
 
 #ifdef _WIN32
 	#include <windows.h>
@@ -143,10 +141,11 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 		// 병렬이 serial 보다 2배 이상 빠르다. // 가장 좋다.
 		int numThread = 0;
 		numThread = omp_get_max_threads();
+		omp_set_num_threads(numThread);
 		double* min_local = new double[numThread];
 		double* max_local = new double[numThread];
 		double* sum_local = new double[numThread];
-		double* count_local = new double[numThread];
+		int* count_local = new int[numThread];
 #pragma omp parallel
 		{
 			int nth = omp_get_thread_num();
@@ -236,11 +235,12 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 
 ascRasterFile::~ascRasterFile()
 {
-	for (__int32 i = 0; i < header.nCols; ++i) {
+	for (int i = 0; i < header.nCols; ++i) {
 		if (valuesFromTL[i] != NULL) {
 			delete[] valuesFromTL[i];
 		}
 	}
+	delete[] valuesFromTL;
 }
 
 ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char separator)
@@ -431,7 +431,7 @@ int confirmDeleteFiles(vector<string> filePathNames)
 				break;
 			}
 		}
-		if (n > 100) { return -1; }
+		if (n > 100) { return 0; }
 	}
 	return 1;
 }
@@ -459,11 +459,10 @@ int confirmDeleteFile(string filePathNames)
 	return 1;
 }
 
-
 string dtos(double value, int precision)
 {
 	char vchar[20];
-	char fchar[10];
+	char fchar[8];
 	sprintf(fchar, "%%.%df", precision);
 	sprintf(vchar, fchar, value);
 	return vchar;
@@ -477,12 +476,12 @@ string dtos2(double value, int precision)
 	return s;
 }
 
-string itos(double value)
-{
-	char vchar[20];
-	sprintf(vchar, "%d", value);
-	return vchar;
-}
+//string itos(double value)
+//{
+//	char vchar[20];
+//	sprintf(vchar, "%d", value);
+//	return vchar;
+//}
 
 
 CPUsInfo getCPUinfo()
@@ -744,16 +743,15 @@ void makeASCTextFile(string fpn, string allHeader, double** array2D,
 	std::ofstream outfile;
 	outfile.open(fpn_out, ios::out);
 	outfile << allHeader << "\n";
-	int isBigSize = -1;
+	int isBigSize = 0;
 	//int BigSizeThreshold = 200000000; //2억개 기준
 	if (arrayLength_x * arrayLength_y > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
 	string formatString = "%." + to_string(precision) + "f ";
 	const char* formatStr = formatString.c_str();
 	//char* aaa= (char*)malloc(sizeof(char) * 10 * arrayLength_x + 1);
-	if (isBigSize == -1) {
+	if (isBigSize == 0) {
 		string allLInes = "";
 		for (int nr = 0; nr < arrayLength_y; nr++) {
-			string aLineEle = "";
 			for (int nc = 0; nc < arrayLength_x; nc++) {
 				char vchar[20];
 				if (array2D[nc][nr] == nodataValue
@@ -763,84 +761,37 @@ void makeASCTextFile(string fpn, string allHeader, double** array2D,
 				else {
 					sprintf(vchar, formatStr, array2D[nc][nr]);
 				}
-				aLineEle += vchar;
+				allLInes += vchar;
 			}
-			allLInes += aLineEle + '\n';
+			allLInes +='\n';
 		}
 		outfile << allLInes;
+		outfile.close();
 	}
 	else {
+		string lines = "";
 		for (int nr = 0; nr < arrayLength_y; nr++) {
-			string aLineEle = "";
 			for (int nc = 0; nc < arrayLength_x; nc++) {
 				char s1[20];
 				if (array2D[nc][nr] == nodataValue
 					|| array2D[nc][nr] == 0) {
-					sprintf(s1, "%d ", array2D[nc][nr]);
+					sprintf(s1, "%d ", (int) array2D[nc][nr]);
 				}
 				else {
 					sprintf(s1, formatStr, array2D[nc][nr]);
 				}
-				aLineEle += s1;
+				lines += s1;
 			}
-			aLineEle += "\n";
-			outfile << aLineEle;
+			lines += "\n";
+			if (nr % 200 == 0) {
+				outfile << lines;
+				lines = "";
+			}			
 		}
+		outfile << lines;
+		outfile.close();
 	}
-	outfile.close();
 }
-
-//// 느리다. 2020.05.06. 최
-//void makeASCTextFile2(string fpn, string allHeader, double** array2D,
-//	int arrayLength_x, int arrayLength_y,
-//	int precision, int nodataValue)
-//{
-//	fs::path fpn_out = fs::path(fpn);
-//	std::ofstream outfile;
-//	outfile.open(fpn_out, ios::out);
-//	outfile << allHeader << "\n";
-//	int isBigSize = -1;
-//	//int BigSizeThreshold = 200000000; //2억개 기준
-//	if (arrayLength_x * arrayLength_y > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
-//	if (isBigSize == -1) {
-//		string strALL = "";
-//		for (int nr = 0; nr < arrayLength_y; nr++) {
-//			string aLineEle = "";
-//			for (int nc = 0; nc < arrayLength_x; nc++) {
-//				string svalue = "";
-//				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-//					svalue = dtos2(array2D[nc][nr], 0);
-//					aLineEle += svalue+" ";
-//				}
-//				else {
-//					svalue = dtos2(array2D[nc][nr],precision);
-//					aLineEle += svalue + " ";
-//				}				
-//			}
-//			strALL += aLineEle + '\n';
-//		}
-//		outfile << strALL;
-//	}
-//	else {
-//		for (int nr = 0; nr < arrayLength_y; nr++) {
-//			string aLineEle = "";
-//			for (int nc = 0; nc < arrayLength_x; nc++) {
-//				string svalue = "";
-//				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-//					svalue = dtos2(array2D[nc][nr], 0);
-//				}
-//				else {
-//					svalue = dtos2(array2D[nc][nr], precision);
-//				}
-//				aLineEle += svalue;
-//			}
-//			aLineEle += "\n";
-//			outfile << aLineEle;
-//		}
-//	}
-//	outfile.close();
-//}
-
 
 void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 	double** array2D,
@@ -849,6 +800,9 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 {
 	int iw = colxNum;// *100;
 	int ih = rowyNum;// *100;
+	int numThread = 0;
+	numThread = omp_get_max_threads();
+	omp_set_num_threads(numThread);
 	bitmap_image img(iw, ih);
 	img.clear();
 	image_drawer draw(img);
@@ -1238,7 +1192,7 @@ char** stringVectorToCharPP(vector<string> inStrV)
 	vector <char*> cpv(inStrV.size());
 	int vs = inStrV.size();
 	char** r = new char* [vs];
-	for (unsigned i = 0; i < vs; ++i) {
+	for (int i = 0; i < vs; ++i) { //unsigned i 
 		int len = strlen(inStrV[i].c_str())+1;
 		r[i] = (char*)malloc(sizeof(char) * len);
 		strcpy(r[i], inStrV[i].c_str());
@@ -1298,7 +1252,7 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 	}	
 	string time_elasped;
 	switch (unitToShow) {
-	case timeUnitToShow::toSecond: {
+	case timeUnitToShow::toS: {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M%S")));
@@ -1315,7 +1269,7 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 		}
 		break;
 	}
-	case timeUnitToShow::toMinute: {
+	case timeUnitToShow::toM: {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H%M")));
@@ -1332,7 +1286,7 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 		}
 		break;
 	}
-	case timeUnitToShow::toHour: {
+	case timeUnitToShow::toH: {
 		switch (tformat) {
 		case dateTimeFormat::yyyymmddHHMMSS: {
 			time_elasped = CT2CA(pt.Format(_T("%Y%m%d%H")));
@@ -1633,7 +1587,7 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 {
 	int nx = arrayLength_x;
 	int ny = arrayLength_y;
-	int isBigSize = -1;
+	int isBigSize = 0;
 	//int BigSizeThreshold = 200000000; //2억개 기준
 	if (nx * ny > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
 	fs::path fpn_out = fs::path(fpn);
@@ -1641,14 +1595,14 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 	outfile.open(fpn_out, ios::app);
 	string formatString = "%." + to_string(precision) + "f ";
 	const char* formatStr = formatString.c_str();
-	if (isBigSize == -1) {
+	if (isBigSize == 0) {
 		string strALL = "";
 		for (int nr = 0; nr < ny; nr++) {
 			string aLineEle = "";
 			for (int nc = 0; nc < nx; nc++) {
 				char s1[10];
 				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-					sprintf(s1, "%g ", array2D[nc][nr]);
+					sprintf(s1, "%d ", (int) array2D[nc][nr]);
 				}
 				else {
 					sprintf(s1, formatStr, array2D[nc][nr]);
@@ -1666,7 +1620,7 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 			for (int nc = 0; nc < nx; nc++) {				
 				char s1[20];
 				if (array2D[nc][nr] == 0 || array2D[nc][nr] == nodataValue) {
-					sprintf(s1, "%g ", array2D[nc][nr]);
+					sprintf(s1, "%d ", (int) array2D[nc][nr]);
 				}
 				else {
 					sprintf(s1, formatStr, array2D[nc][nr]);
@@ -1686,13 +1640,13 @@ void writeTwoDimData(string fpn, double** array2D, int arrayLength_x, int arrayL
 //{
 //	int nx = arrayLength_x;
 //	int ny = arrayLength_y;
-//	int isBigSize = -1;
+//	int isBigSize = 0;
 //	//int BigSizeThreshold = 200000000; //2억개 기준
 //	if (nx * ny > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
 //	fs::path fpn_out = fs::path(fpn);
 //	std::ofstream outfile;
 //	outfile.open(fpn_out, ios::app);
-//	if (isBigSize == -1) {
+//	if (isBigSize == 0) {
 //		string strALL = "";
 //		for (int nr = 0; nr < ny; nr++) {
 //			for (int nc = 0; nc < nx; nc++) {
