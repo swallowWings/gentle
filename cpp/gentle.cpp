@@ -30,11 +30,11 @@
 
 using namespace std;
 namespace fs = std::filesystem;
-
+extern fs::path fpnLog;
 ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 {
 	fs::path fpnASC = fpn_ascRasterFile;
-	int r = 0;
+	//writeLog(fpnLog,"Read input file : " + fpn_ascRasterFile+'\n',1,1);
 	ifstream ascFile(fpnASC);
 	if (ascFile.is_open()) {
 		string aline;
@@ -66,16 +66,17 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 	value_sum = 0;
 	cellCount_notNull = 0;
 	value_max = DBL_MIN;
-	value_min = DBL_MAX;
+	value_min = DBL_MAX;	
 	if (isBigSize == false) {
 		vector<string> allLinesv = readTextFileToStringVector(fpn_ascRasterFile);
-		int lyMax = (int)allLinesv.size();
+		int lyMax = dataStaringIndex + header.nRows - 1; //(int)allLinesv.size();
 		// //serial이 parallel 보다 2배 이상 느리다.
-		//for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
+		//for (int ly = dataStaringIndex; ly < lyMax; ++ly) {
 		//	vector<string> values = splitToStringVector(allLinesv[ly], ' ');
 		//	int y = ly - dataStaringIndex;
-		//	int nX = (int)values.size();
+		//	int nX = header.nCols;// (int)values.size();
 		//	for (int x = 0; x < nX; ++x) {
+		//		writeLog(fpnLog, "(x, y), value : " + to_string(x) + ", " + to_string(y) + ", " + values[x] + '\n', 1, 1);
 		//		if (isNumeric(values[x]) == true) {
 		//			valuesFromTL[x][y] = stod(values[x]);
 		//		}
@@ -92,51 +93,52 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 		//				value_min = valuesFromTL[x][y];
 		//			}
 		//		}
+		//		writeLog(fpnLog, "(x, y) : " + to_string(x) + ", " + to_string(y) + " completed...\n", 1, 1);
 		//	}
 		//}
 
-//#pragma omp parallel
-//		{
-//			double min_local = DBL_MAX;
-//			double sum_local = 0;
-//			int count_local = 0;
-//			double max_local = DBL_MIN;
-//#pragma omp parallel for 
-//			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
-//				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
-//				int y = ly - dataStaringIndex;
-//				int nX = (int)values.size();
-//				for (int x = 0; x < nX; ++x) {
-//					if (isNumeric(values[x]) == true) {
-//						valuesFromTL[x][y] = stod(values[x]);
-//					}
-//					else {
-//						valuesFromTL[x][y] = header.nodataValue;
-//					}
-//					if (valuesFromTL[x][y] != header.nodataValue) {
-//						count_local = count_local + 1;
-//						sum_local = sum_local + valuesFromTL[x][y];
-//						if (valuesFromTL[x][y] > max_local) {
-//							max_local = valuesFromTL[x][y];
-//						}
-//						if (valuesFromTL[x][y] < min_local) {
-//							min_local = valuesFromTL[x][y];
-//						}
-//					}
-//				}
-//			}
-//#pragma omp critical
-//			{
-//				if (value_max < max_local) {
-//					value_max = max_local;
-//				}
-//				if (value_min > min_local) {
-//					value_min = min_local;
-//				}
-//				value_sum = value_sum + sum_local;
-//				cellCount_notNull = cellCount_notNull + count_local;
-//			}
-//		}
+////#pragma omp parallel
+////		{
+////			double min_local = DBL_MAX;
+////			double sum_local = 0;
+////			int count_local = 0;
+////			double max_local = DBL_MIN;
+////#pragma omp parallel for 
+////			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
+////				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
+////				int y = ly - dataStaringIndex;
+////				int nX = (int)values.size();
+////				for (int x = 0; x < nX; ++x) {
+////					if (isNumeric(values[x]) == true) {
+////						valuesFromTL[x][y] = stod(values[x]);
+////					}
+////					else {
+////						valuesFromTL[x][y] = header.nodataValue;
+////					}
+////					if (valuesFromTL[x][y] != header.nodataValue) {
+////						count_local = count_local + 1;
+////						sum_local = sum_local + valuesFromTL[x][y];
+////						if (valuesFromTL[x][y] > max_local) {
+////							max_local = valuesFromTL[x][y];
+////						}
+////						if (valuesFromTL[x][y] < min_local) {
+////							min_local = valuesFromTL[x][y];
+////						}
+////					}
+////				}
+////			}
+////#pragma omp critical
+////			{
+////				if (value_max < max_local) {
+////					value_max = max_local;
+////				}
+////				if (value_min > min_local) {
+////					value_min = min_local;
+////				}
+////				value_sum = value_sum + sum_local;
+////				cellCount_notNull = cellCount_notNull + count_local;
+////			}
+////		}
 
 		// 병렬이 serial 보다 2배 이상 빠르다. // 가장 좋다.
 		int numThread = 0;
@@ -157,7 +159,7 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
 				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
 				int y = ly - dataStaringIndex;
-				int nX = (int)values.size();
+				int nX = header.nCols;// (int)values.size();
 				for (int x = 0; x < nX; ++x) {
 					if (isNumeric(values[x]) == true) {
 						valuesFromTL[x][y] = stod(values[x]);
