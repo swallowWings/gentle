@@ -10,7 +10,7 @@ namespace gentle
 {
     public class cTextFile
     {
-        private const int BigSizeThreshold = 200000000;//2억개 기준
+        private const int BigSizeThreshold = 70000000;//7천만개 기준 //200000000;//2억개 기준
         public enum ValueSeparator
         {
             COMMA,

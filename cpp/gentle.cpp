@@ -35,6 +35,10 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 {
 	fs::path fpnASC = fpn_ascRasterFile;
 	//writeLog(fpnLog,"Read input file : " + fpn_ascRasterFile+'\n',1,1);
+	//if (fpn_ascRasterFile == "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Watershed_c.asc")
+	//{
+	//	int a = 1;
+	//}
 	ifstream ascFile(fpnASC);
 	if (ascFile.is_open()) {
 		string aline;
