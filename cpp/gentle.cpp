@@ -39,6 +39,7 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 	//{
 	//	int a = 1;
 	//}
+	//writeLog(fpnLog, "Qdebug asc fpn : " + fpn_ascRasterFile + "\n", 1, -1);
 	ifstream ascFile(fpnASC);
 	if (ascFile.is_open()) {
 		string aline;
@@ -274,6 +275,7 @@ ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char sepa
 			header.yllcorner = stod(LineParts[1]);
 			break;
 		case 4:
+			//writeLog(fpnLog, "Qdebug LineParts 0, Line 4 : " + LineParts[0] + "\n", 1, -1);
 			if (lower(LineParts[0]) == "dx") {
 				if (isNumeric(LineParts[1]) == true) {
 					header.dx = stof(LineParts[1]);
@@ -283,16 +285,20 @@ ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char sepa
 				}
 			}
 			else if (lower(LineParts[0]) == "cellsize") {
-				if (isNumeric(LineParts[1]) == true) {
+				//writeLog(fpnLog, "Qdebug LineParts 1 : " + LineParts[1] + "\n", 1, -1);
+				if (isNumericDbl(LineParts[1]) == true) {
 					header.cellsize = stof(LineParts[1]);
+					//writeLog(fpnLog, "Qdebug header.cellsize is numeric true\n", 1, -1);
 				}
 				else {
 					header.cellsize = -1;
+					//writeLog(fpnLog, "Qdebug header.cellsize is numeric false\n", 1, -1);
 				}
 			}
 			else {
 				header.cellsize = -1;
 			}
+			//writeLog(fpnLog, "Qdebug header.cellsize in gentle : " + to_string(header.cellsize) + "\n", 1, -1);
 			break;
 		case 5:
 			if (lower(LineParts[0]) == "nodata_value") {
