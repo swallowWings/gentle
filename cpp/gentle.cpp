@@ -474,12 +474,13 @@ string dtos(double value, int precision)
 	return vchar;
 }
 
-string dtos2(double value, int precision)
+string dtos_L(double value, int length, int precision)
 {
-	stringstream stream;
-	stream << std::fixed << std::setprecision(precision) << value;
-	string s = stream.str();
-	return s;
+	char vchar[20];
+	char fchar[8];
+	sprintf(fchar, "%%0%d.%df", length, precision);
+	sprintf(vchar, fchar, value);
+	return vchar;
 }
 
 //string itos(double value)

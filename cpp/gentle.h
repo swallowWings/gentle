@@ -131,7 +131,7 @@ int confirmDeleteFiles(vector<string> filePathNames);
 
 // formatted numeric string
 string dtos(double value, int precision); //빠르다
-string dtos2(double value, int precision);//느리다
+string dtos_L(double value, int length, int precision); //빠르다
 //string itos(double value);
 
 CPUsInfo getCPUinfo();
