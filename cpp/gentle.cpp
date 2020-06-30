@@ -73,7 +73,7 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 	value_min = DBL_MAX;	
 	if (isBigSize == false) {
 		vector<string> allLinesv = readTextFileToStringVector(fpn_ascRasterFile);
-		int lyMax = dataStaringIndex + header.nRows - 1; //(int)allLinesv.size();
+		int lyMax = dataStaringIndex + header.nRows ; //(int)allLinesv.size();
 		// //serial이 parallel 보다 2배 이상 느리다.
 		//for (int ly = dataStaringIndex; ly < lyMax; ++ly) {
 		//	vector<string> values = splitToStringVector(allLinesv[ly], ' ');
