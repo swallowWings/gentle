@@ -945,16 +945,29 @@ map <int, vector<string>> readVatFile(string vatFPN, char seperator)
 
 string replaceText(string inText, string textToFind, string textToRepalce)
 {
-	string s;
-	int idxStart = inText.find(textToFind, 0);
-	if (idxStart > 0) {
-		int length = textToFind.length();
-		s = inText.replace(idxStart, length, textToRepalce);
+	//string s;
+	int idx = 0;
+	while (idx !=-1) {
+		idx = inText.find(textToFind, 0);
+		if (idx == -1) { break; }
+		if (idx > 0) {
+			int length = textToFind.length();
+			inText.replace(idx, length, textToRepalce);
+		}
+		else {
+			inText;
+		}
 	}
-	else {
-		s = inText;
-	}
-	return s;
+	//string s;
+	//int idxStart = inText.find(textToFind, 0);
+	//if (idxStart > 0) {
+	//	int length = textToFind.length();
+	//	s = inText.replace(idxStart, length, textToRepalce);
+	//}
+	//else {
+	//	s = inText;
+	//}
+	return inText;
 }
 
 vector<double> readTextFileToDoubleVector(string fpn)
@@ -964,12 +977,14 @@ vector<double> readTextFileToDoubleVector(string fpn)
 	vector<double> linesv;
 	while (!txtFile.eof()) {
 		getline(txtFile, aline);
+		aline = trim(aline);
 		if (aline.size() > 0) {
 			if (isNumeric(aline) == true) {
 				linesv.push_back(stod(aline));
 			}
 			else {
 				cout << fpn << " contains non-numeric value."<< endl;
+				linesv.clear();
 				return linesv;
 			}
 		}
@@ -984,12 +999,14 @@ vector<float> readTextFileToFloatVector(string fpn)
 	vector<float> linesv;
 	while (!txtFile.eof()) {
 		getline(txtFile, aline);
+		aline = trim(aline);
 		if (aline.size() > 0) {
 			if (isNumeric(aline) == true) {
 				linesv.push_back(stof(aline));
 			}
 			else {
 				cout << fpn << " contains non-numeric value." << endl;
+				linesv.clear();
 				return linesv;
 			}
 		}
@@ -1012,6 +1029,7 @@ vector<string> readTextFileToStringVector(string fpn)
 	vector<string> linesv;
 	while (!txtFile.eof())	{
 		getline(txtFile, aline);
+		aline = trim(aline);
 		if (aline.size() > 0)		{
 			linesv.push_back(aline);
 		}		
