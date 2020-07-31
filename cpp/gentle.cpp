@@ -586,9 +586,11 @@ version getCurrentFileVersion()
 					//printf("\tTime Last Access  : %s\n", timeToString(localtime(&buf.st_atime)));
 					//tm ltm;
 					//localtime_s(&ltm, &buf.st_mtime);
-					COleDateTime tnow = COleDateTime::GetCurrentTime();
-					sprintf_s(ver.LastWrittenTime, timeToString(tnow,
-						false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS).c_str());
+					//COleDateTime tnow = COleDateTime::GetCurrentTime();
+					//sprintf_s(ver.LastWrittenTime, timeToString(tnow,
+					//	false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS).c_str());
+					sprintf_s(ver.LastWrittenTime, timeToString(localtime(&buf.st_mtime),
+						false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS,true));
 				}
 			}
 		}
@@ -1338,16 +1340,22 @@ string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 }
 
 // yyyymmdd HH:MM:SS
-char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat)
+char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat, bool isLocalTime)
 {
 	static char s[20];
-	if (includeSEC ==false) {
+	int year = 0;
+	if (isLocalTime == false) {
+		year = t->tm_year;
+	}
+	else {
+		year=t->tm_year + 1900;
+	}
+	if (includeSEC == false) {
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d",
-				t->tm_year, t->tm_mon + 1, t->tm_mday,
+				year, t->tm_mon + 1, t->tm_mday,
 				t->tm_hour, t->tm_min);
-			// t로 local time이 들어오면 t.tm_year+1900 해야 한다.
 			break;
 		}
 		}
@@ -1356,9 +1364,8 @@ char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat)
 		switch (tformat) {
 		case dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS: {
 			sprintf_s(s, "%04d-%02d-%02d %02d:%02d:%02d",
-				t->tm_year, t->tm_mon + 1, t->tm_mday,
+				year, t->tm_mon + 1, t->tm_mday,
 				t->tm_hour, t->tm_min, t->tm_sec);
-			break;
 		}
 		}
 	}

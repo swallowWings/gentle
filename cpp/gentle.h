@@ -190,7 +190,8 @@ string timeElaspedToDateTimeFormat(string startTime_yyyymmddHHMM,
 string timeElaspedToDateTimeFormat2(string startTime_yyyy_mm_dd__HHclnMM,
 	int elaspedTimeSec, timeUnitToShow unitToShow, 
 	dateTimeFormat tformat);
-char* timeToString(struct tm* t, bool includeSEC, dateTimeFormat tformat);
+char* timeToString(struct tm* t, bool includeSEC, 
+	dateTimeFormat tformat, bool isLocalTime);
 string timeToString(struct tm t, bool includeSEC, dateTimeFormat tformat);
 string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat);
 string lower(string instring);
