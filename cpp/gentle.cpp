@@ -254,7 +254,7 @@ ascRasterHeader ascRasterFile::getAscRasterHeader(string inputLInes[], char sepa
 {
 	ascRasterHeader header;
 	header.dataStartingLineIndex = -1;
-	for (int ln = 0; ln < 7; ++ln)
+	for (int ln = 0; ln < 8; ++ln)
 	{
 		string aline = inputLInes[ln];
 		vector<string> LineParts = splitToStringVector(aline, separator);
