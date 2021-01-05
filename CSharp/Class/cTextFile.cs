@@ -678,41 +678,24 @@ namespace gentle
         {
             try
             {
-                string sFPN = strSourceFNP.Trim().ToLower();
-                string tFPN = strTagetFNP.Trim().ToLower();
-                String tmpFPN = "";
-                if (sFPN == tFPN)
+                string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
+                int intTotCountLine = strLines.Length;
+                int intNLine = 0;
+                int nMax = 0;
+                if (startingLineIndex > -1 && endingLineIndex > -1)
                 {
-                    tmpFPN = Path.Combine(Path.GetDirectoryName(strSourceFNP), Path.GetFileNameWithoutExtension(strSourceFNP) + ".tmp");
+                    nMax = endingLineIndex;
                 }
                 else
                 {
-                    tmpFPN = strTagetFNP;
+                    nMax = intTotCountLine - 1;
                 }
-
-                int ln = 0;
-                foreach (string line in File.ReadLines(strSourceFNP))
+                if (startingLineIndex == -1) startingLineIndex = 0;
+                for (intNLine = startingLineIndex; intNLine <= nMax; intNLine++)
                 {
-                    if (endingLineIndex > 0 && ln > endingLineIndex)
-                    {
-                        break;
-                    }
-                    string newL= line;
-                    if (ln >= startingLineIndex)
-                    {
-                        newL = newL.Replace(strTextToFind, strTextToReplace);
-                    }
-                    System.IO.File.AppendAllText(tmpFPN, newL + "\r\n");
-                    ln++;
+                    strLines[intNLine] = strLines[intNLine].Replace(strTextToFind, strTextToReplace);
                 }
-                if (sFPN == tFPN)
-                {
-                    File.Delete(strSourceFNP);
-                    int tmp = 0;
-                    cComTools.timeDelay();
-                    File.Move(tmpFPN, strTagetFNP);
-                }
-
+                System.IO.File.WriteAllLines(strTagetFNP, strLines);
                 GC.Collect();
             }
             catch (Exception ex)
@@ -792,21 +775,24 @@ namespace gentle
                 string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
                 int intTotCountLine = strLines.Length;
                 int intNLine = 0;
-                for (intNLine = 0; intNLine < intTotCountLine ; intNLine++)
+                int nMax = 0;
+                if (startingLineIndex > -1 && endingLineIndex > -1)
                 {
-                    if (endingLineIndex > 0 && intNLine > endingLineIndex)
-                    {
-                        break;
-                    }
-                    if (intNLine >= startingLineIndex)
-                    {
+                    nMax = endingLineIndex;
+                }
+                else
+                {
+                    nMax = intTotCountLine - 1;
+                }
+                for (intNLine = startingLineIndex; intNLine <= nMax ; intNLine++)
+                {
                         if (strLines[intNLine].Trim () == strTextToFind .Trim ())
                         {
                             strLines[intNLine] = strTextToReplace.Trim();
                         }
-                    }
                 }
                 System.IO.File.WriteAllLines(strTagetFNP, strLines);
+                GC.Collect();
             }
             catch (Exception ex)
             {
@@ -815,7 +801,7 @@ namespace gentle
         }
 
 
-        public static void RemoveAlineFromTextFile(string strSourceFNP, string strTagetFNP, int lineIndexToStart = 0, int lineIdexToEnd=0)
+        public static void RemoveLinesFromTextFile(string strSourceFNP, string strTagetFNP, int lineIndexToStart = 0, int lineIdexToEnd=0)
         {
             try
             {
