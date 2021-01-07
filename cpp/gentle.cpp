@@ -842,7 +842,7 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 					col = { 255, 217, 170 };
 				}
 				else {
-					int v = 490 + (int)(av / rendererMaxV * 510.0);// hsv_colormap 에서 490부터 사용한다.
+					int v = 490 + (int)(av / rendererMaxV * 500.0);// hsv_colormap 에서 490부터 사용. 990까지 사용
 					col = hsv_colormap[v];
 				}
 				img.set_pixel(x, y, col.red, col.green, col.blue);
@@ -865,7 +865,7 @@ void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
 					if (av < 0) {
 						av = 0;
 					}
-					int v = 380 + (int)(av / rendererMaxV * 610.0);
+					int v = 380 + (int)(av / rendererMaxV * 610.0);// hsv_colormap 에서 380부터 사용. 990까지 사용
 					col = hsv_colormap[v];
 				}
 				img.set_pixel(x, y, col.red, col.green, col.blue);

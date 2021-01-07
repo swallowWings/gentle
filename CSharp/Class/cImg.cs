@@ -4,9 +4,11 @@ using System.Collections.Generic;
 //using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+
 
 
 namespace gentle
@@ -272,6 +274,26 @@ namespace gentle
             return img;
         }
 
+        public static void FillPictureBoxWithGradientColor(ref PictureBox inPictureBox,
+              List<Color> ColorsFromTopToBottom, System.Windows.Forms.PaintEventArgs e)
+        {
+            LinearGradientBrush br = new LinearGradientBrush(inPictureBox.ClientRectangle, 
+                Color.Transparent , Color.Transparent, LinearGradientMode.Vertical);
+            ColorBlend cb = new ColorBlend();
+            int nClass = ColorsFromTopToBottom.Count;
+
+            float[] cbs = new float[nClass];
+            for (int n=0; n < nClass; n++)
+            {
+                cbs[n] = (float)n / (float)(nClass - 1);
+            }
+            cb.Positions = cbs; 
+            cb.Colors = ColorsFromTopToBottom.ToArray();
+            br.InterpolationColors = cb;
+            e.Graphics.FillRectangle(br, inPictureBox.DisplayRectangle);
+            br.Dispose();
+        }
+
         public Bitmap MakeImgFileAndGetImgUsingArrayFromTL(string imgFPNtoMake, double[,] array, float imgWidth,
             float imgHeight, RendererRange rangeType, double nullValue = -9999)
         {
@@ -493,7 +515,7 @@ namespace gentle
             float height, Color defaultColor, double nullValue = -9999)
         {
             gentle.cAscRasterReader ascF = new cAscRasterReader(inASCFPN);
-            int LayerCellWcount = ascF.Header.numberRows;
+            int LayerCellWcount = ascF.Header.numberCols ;
             int LayerCellHcount = ascF.Header.numberRows;
             int CellCount = (LayerCellWcount * LayerCellHcount);
             int CellWbmp = 0;
