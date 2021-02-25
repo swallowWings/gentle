@@ -563,9 +563,12 @@ version getCurrentFileVersion()
 			// buffer로 부터 VS_FIXEDFILEINFO 정보
 			//VerQueryValueA(buffer, "\\", (LPVOID*)&pFineInfo, &bufLen);
 			if (VerQueryValue(buffer, "\\", (LPVOID*)&pFineInfo, &bufLen) != 0) {
-				ver.major = HIWORD(pFineInfo->dwFileVersionMS);
-				ver.minor = LOWORD(pFineInfo->dwFileVersionMS);
-				ver.build = HIWORD(pFineInfo->dwFileVersionLS);
+				ver.pmajor= HIWORD(pFineInfo->dwProductVersionMS);
+				ver.pminor = LOWORD(pFineInfo->dwProductVersionMS);
+				ver.pbuild = HIWORD(pFineInfo->dwProductVersionLS);
+				ver.fmajor = HIWORD(pFineInfo->dwFileVersionMS);
+				ver.fminor = LOWORD(pFineInfo->dwFileVersionMS);
+				ver.fbuild = HIWORD(pFineInfo->dwFileVersionLS);
 				//ver.LastWrittenTime = new char[30];
 				struct _stat buf;
 				if (_stat(fpn_exe, &buf) != 0) {
@@ -662,11 +665,19 @@ int getTableStateByXmlLineByLine(string aLine, string tableName)
 
 	if (sActive == trim(aLine)) {
 		return 1;// activated state
-	} 
+	}
+	int posS = (int)aLine.find(sActive, 0);
+	if (posS >= 0) {
+		return 1; // activated state
+	}
 	if (sinActive == trim(aLine)) {
 		return 0;// inactivated state. closed
 	}
-	return -1; 
+	int posE = (int)aLine.find(sinActive, 0);
+	if (posE >= 0) {
+		return 0; // inactivated state. closed.
+	}
+	return -1;
 }
 
 int getTableStateByXmlLine(string aLine, string tableName)
@@ -1444,13 +1455,13 @@ string timeToString(COleDateTime t, bool includeSEC, dateTimeFormat tformat)
 
 string lower(string instring)
 {
-	std::transform(instring.begin(), instring.end(), instring.begin(), tolower);
+	std::transform(instring.begin(), instring.end(), instring.begin(), (int (*)(int)) tolower);
 	return instring;
 }
 
 string upper(string instring)
 {
-	std::transform(instring.begin(), instring.end(), instring.begin(), toupper);
+	std::transform(instring.begin(), instring.end(), instring.begin(), (int (*)(int)) toupper);
 	return instring;
 }
 

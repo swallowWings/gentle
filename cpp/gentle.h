@@ -61,9 +61,12 @@ typedef struct _CPUsInfo
 
 typedef struct _version
 {
-	WORD major=NULL	;
-	WORD minor = NULL;
-	WORD build = NULL;
+	WORD pmajor = NULL;
+	WORD pminor = NULL;
+	WORD pbuild = NULL;
+	WORD fmajor=NULL	;
+	WORD fminor = NULL;
+	WORD fbuild = NULL;
 	char LastWrittenTime[30] = { ""};
 } version;
 
