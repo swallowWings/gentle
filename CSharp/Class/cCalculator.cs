@@ -10,7 +10,7 @@ namespace gentle
     {
         public static bool checkIsAlgebraicOperator(string inString)
         {
-           switch (inString.Trim())
+            switch (inString.Trim())
             {
                 case "+":
                     return true;
@@ -35,7 +35,7 @@ namespace gentle
             {
                 values[0] = "-" + values[0];
             }
-            for (int e=0;e<values.Length;e++)
+            for (int e = 0; e < values.Length; e++)
             {
                 values[e] = values[e].Trim();
             }
@@ -46,7 +46,7 @@ namespace gentle
         public static string getOperatorFromString(string inString)
         {
             //string[] operators = { ",", "(", ")", "=+", "=-", ">=+", ">=-", "<=+", "<=-", ">+", ">-", "<+", "<-", "/+", "/-", "^+", "^-", ">=", "<=", "=", ">", "<", "+", "-", "*", "/", "^" };
-            string[] operators_sep = { ",", "(", ")"};
+            string[] operators_sep = { ",", "(", ")" };
             foreach (string op in operators_sep)
             {
                 if (inString.Contains(op.Trim()))
@@ -55,7 +55,7 @@ namespace gentle
                 }
             }
 
-            string[] operators_condition = {">=", "<=", "=", ">", "<"};
+            string[] operators_condition = { ">=", "<=", "=", ">", "<" };
             foreach (string op in operators_condition)
             {
                 if (inString.Contains(op.Trim()))
@@ -66,7 +66,7 @@ namespace gentle
             string[] operators_Math = { "*", "/", "^", "+", "-" };
             foreach (string op in operators_Math)
             {
-                if (inString.Contains (op.Trim()))
+                if (inString.Contains(op.Trim()))
                 {
                     return op;
                 }
@@ -97,12 +97,12 @@ namespace gentle
         }
 
         public static double[,] calculate2DArryUsingMathFunction(double[,] asc2D,
-            cData.MathFunctionType fType, double expV=1, double nodataValue = -9999)
+            cData.MathFunctionType fType, double expV = 1, double nodataValue = -9999)
         {
             int ny = asc2D.GetLength(1);
             int nx = asc2D.GetLength(0);
             double[,] resultArr = null;
-            resultArr = new double[nx, ny];  
+            resultArr = new double[nx, ny];
             ParallelOptions options = new ParallelOptions();
             options.MaxDegreeOfParallelism = Environment.ProcessorCount;
             switch (fType)
@@ -128,7 +128,7 @@ namespace gentle
                                 Console.WriteLine(em);
                                 return;
                             }
-                            else 
+                            else
                             {
                                 resultArr[x, y] = Math.Pow(v, expV);
                             }
@@ -149,9 +149,9 @@ namespace gentle
                             {
                                 resultArr[x, y] = 0;
                             }
-                            else 
+                            else
                             {
-                                resultArr[x, y] =  Math.Abs(v);
+                                resultArr[x, y] = Math.Abs(v);
                             }
 
                         }
@@ -216,7 +216,7 @@ namespace gentle
                     }
                 }
             });
-        //}
+            //}
             return resultArr;
         }
 
@@ -332,7 +332,7 @@ namespace gentle
             return vout;
         }
 
-        public static double algebraicCal(string conditionString, double v1, double v2,  double nodataValue)
+        public static double algebraicCal(string conditionString, double v1, double v2, double nodataValue)
         {
             double vout = 0;
             switch (conditionString)
@@ -372,20 +372,20 @@ namespace gentle
                     break;
                 case cData.StatisticsType.Maximum:
                     vout = v1;
-                    if (v1< v2)
+                    if (v1 < v2)
                     {
                         vout = v2;
                     }
                     break;
                 case cData.StatisticsType.Minimum:
                     vout = v1;
-                    if (v1 >v2)
+                    if (v1 > v2)
                     {
                         vout = v2;
                     }
                     break;
                 case cData.StatisticsType.Average:
-                    vout = (v1+v2)/2;
+                    vout = (v1 + v2) / 2;
                     break;
                 default:
                     vout = nodataValue;
@@ -396,50 +396,16 @@ namespace gentle
 
 
         public static double[,] staticsticsUsingTwo2DArrayOfASCraster(double[,] inArray1, double[,] inArray2, double nodataValue,
-            cData.StatisticsType stype, bool allowNegative = false)
+            cData.StatisticsType stype, double minThreshold, bool allowNegative = false)
         {
             double[,] array = new double[inArray1.GetLength(0), inArray1.GetLength(1)];
             //for (int y = 0; y < array.GetLength(1) ; y++)
             //{
             //    for (int x = 0; x < array.GetLength(0); x++)
             //    {
-            //        if (inArray1[x, y] == nodataValue || inArray2[x, y] == nodataValue)
-            //        {
-            //            if (inArray1[x, y] == nodataValue & inArray2[x, y] == nodataValue)
-            //            {
-            //                array[x, y] = nodataValue;//둘다 null 이면,  null
-            //            }
-            //            else
-            //            {
-            //                if (inArray1[x, y] == nodataValue)
-            //                {
-            //                    inArray1[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
-            //                }
-            //                if (inArray2[x, y] == nodataValue)
-            //                {
-            //                    inArray2[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
-            //                }
-            //                if (allowNegative == false)
-            //                {
-            //                    if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
-            //                    if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
-            //                }
-            //                array[x, y] = inArray1[x, y] + inArray2[x, y];
-            //            }
-            //        }
-            //        else
-            //        {
-            //            if (allowNegative == false)
-            //            {
-            //                if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
-            //                if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
-            //            }
-            //            array[x, y] = inArray1[x, y] + inArray2[x, y];
-
-            //        }
+            //       
             //    }
             //}
-
             var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
             Parallel.For(0, array.GetLength(1), options, delegate (int y)
             {
@@ -466,6 +432,8 @@ namespace gentle
                                 if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
                                 if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
                             }
+                            if (inArray1[x, y] < minThreshold) { inArray1[x, y] = 0; }
+                            if (inArray2[x, y] < minThreshold) { inArray2[x, y] = 0; }
                             array[x, y] = calStatistics(stype, inArray1[x, y], inArray2[x, y], nodataValue);
                         }
                     }
@@ -476,6 +444,8 @@ namespace gentle
                             if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
                             if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
                         }
+                        if (inArray1[x, y] < minThreshold) { inArray1[x, y] = 0; }
+                        if (inArray2[x, y] < minThreshold) { inArray2[x, y] = 0; }
                         array[x, y] = calStatistics(stype, inArray1[x, y], inArray2[x, y], nodataValue);
                     }
                 }
