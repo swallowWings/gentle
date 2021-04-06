@@ -361,5 +361,127 @@ namespace gentle
             }
             return vout;
         }
+
+        public static double calStatistics(cData.StatisticsType stype, double v1, double v2, double nodataValue)
+        {
+            double vout = 0;
+            switch (stype)
+            {
+                case cData.StatisticsType.Sum:
+                    vout = v1 + v2;
+                    break;
+                case cData.StatisticsType.Maximum:
+                    vout = v1;
+                    if (v1< v2)
+                    {
+                        vout = v2;
+                    }
+                    break;
+                case cData.StatisticsType.Minimum:
+                    vout = v1;
+                    if (v1 >v2)
+                    {
+                        vout = v2;
+                    }
+                    break;
+                case cData.StatisticsType.Average:
+                    vout = (v1+v2)/2;
+                    break;
+                default:
+                    vout = nodataValue;
+                    break;
+            }
+            return vout;
+        }
+
+
+        public static double[,] staticsticsUsingTwo2DArrayOfASCraster(double[,] inArray1, double[,] inArray2, double nodataValue,
+            cData.StatisticsType stype, bool allowNegative = false)
+        {
+            double[,] array = new double[inArray1.GetLength(0), inArray1.GetLength(1)];
+            //for (int y = 0; y < array.GetLength(1) ; y++)
+            //{
+            //    for (int x = 0; x < array.GetLength(0); x++)
+            //    {
+            //        if (inArray1[x, y] == nodataValue || inArray2[x, y] == nodataValue)
+            //        {
+            //            if (inArray1[x, y] == nodataValue & inArray2[x, y] == nodataValue)
+            //            {
+            //                array[x, y] = nodataValue;//둘다 null 이면,  null
+            //            }
+            //            else
+            //            {
+            //                if (inArray1[x, y] == nodataValue)
+            //                {
+            //                    inArray1[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+            //                }
+            //                if (inArray2[x, y] == nodataValue)
+            //                {
+            //                    inArray2[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+            //                }
+            //                if (allowNegative == false)
+            //                {
+            //                    if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+            //                    if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+            //                }
+            //                array[x, y] = inArray1[x, y] + inArray2[x, y];
+            //            }
+            //        }
+            //        else
+            //        {
+            //            if (allowNegative == false)
+            //            {
+            //                if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+            //                if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+            //            }
+            //            array[x, y] = inArray1[x, y] + inArray2[x, y];
+
+            //        }
+            //    }
+            //}
+
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+            Parallel.For(0, array.GetLength(1), options, delegate (int y)
+            {
+                for (int x = 0; x < array.GetLength(0); x++)
+                {
+                    if (inArray1[x, y] == nodataValue || inArray2[x, y] == nodataValue)
+                    {
+                        if (inArray1[x, y] == nodataValue & inArray2[x, y] == nodataValue)
+                        {
+                            array[x, y] = nodataValue;//둘다 null 이면,  null
+                        }
+                        else
+                        {
+                            if (inArray1[x, y] == nodataValue)
+                            {
+                                inArray1[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+                            }
+                            if (inArray2[x, y] == nodataValue)
+                            {
+                                inArray2[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+                            }
+                            if (allowNegative == false)
+                            {
+                                if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+                                if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+                            }
+                            array[x, y] = calStatistics(stype, inArray1[x, y], inArray2[x, y], nodataValue);
+                        }
+                    }
+                    else
+                    {
+                        if (allowNegative == false)
+                        {
+                            if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+                            if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+                        }
+                        array[x, y] = calStatistics(stype, inArray1[x, y], inArray2[x, y], nodataValue);
+                    }
+                }
+            });
+
+            return array;
+        }
     }
 }

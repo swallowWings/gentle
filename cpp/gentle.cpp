@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include <iostream>
 #include <string>
 #include <stdio.h>
@@ -589,7 +590,7 @@ version getCurrentFileVersion()
 					//printf("\tTime Last Access  : %s\n", timeToString(localtime(&buf.st_atime)));
 					//tm ltm;
 					//localtime_s(&ltm, &buf.st_mtime);
-					//COleDateTime tnow = COleDateTime::GetCurrentTime();
+					COleDateTime tnow = COleDateTime::GetCurrentTime();
 					//sprintf_s(ver.LastWrittenTime, timeToString(tnow,
 					//	false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS).c_str());
 					sprintf_s(ver.LastWrittenTime, timeToString(localtime(&buf.st_mtime),
