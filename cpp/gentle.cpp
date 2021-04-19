@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include <iostream>
 #include <string>
 #include <stdio.h>
@@ -35,12 +34,6 @@ extern fs::path fpnLog;
 ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 {
 	fs::path fpnASC = fpn_ascRasterFile;
-	//writeLog(fpnLog,"Read input file : " + fpn_ascRasterFile+'\n',1,1);
-	//if (fpn_ascRasterFile == "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Watershed_c.asc")
-	//{
-	//	int a = 1;
-	//}
-	//writeLog(fpnLog, "Qdebug asc fpn : " + fpn_ascRasterFile + "\n", 1, -1);
 	ifstream ascFile(fpnASC);
 	if (ascFile.is_open()) {
 		string aline;
@@ -174,7 +167,6 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 						valuesFromTL[x][y] = header.nodataValue;
 					}
 					if (valuesFromTL[x][y] != header.nodataValue) {
-						//cellCount_notNull++;
 						count_local[nth] = count_local[nth] + 1;
 						sum_local[nth] = sum_local[nth] + valuesFromTL[x][y];
 						if (valuesFromTL[x][y] > max_local[nth]) {
@@ -235,7 +227,6 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 			nl++;
 		}
 	}
-
 	if (cellCount_notNull > 0) {
 		value_ave = value_sum / cellCount_notNull;
 	}
@@ -490,14 +481,6 @@ string dtos_L(double value, int length, int precision)
 	return vchar;
 }
 
-//string itos(double value)
-//{
-//	char vchar[20];
-//	sprintf(vchar, "%d", value);
-//	return vchar;
-//}
-
-
 CPUsInfo getCPUinfo()
 {
 	CPUInfoDelegate *cpuInfo = new CPUInfoDelegate();
@@ -632,7 +615,7 @@ string getGPUinfo()
 	{
 		infoStr += "  GPU #" + to_string(gpuCount) + ".\n";
 		infoStr += "    GPU name : " + iter->name() + '\n';
-		infoStr += "    GPU adapter ram : " + iter->adapterRAM() + '\n';
+		//infoStr += "    GPU adapter RAM : " + iter->adapterRAM() + '\n';
 		infoStr += "    GPU driver version : " + iter->driverVersion() + '\n';
 		gpuCount++;
 	}
@@ -760,134 +743,6 @@ bool isNumeric(string instr)
 		return true;
 	}
 }
-
-// 빠르다. 2020.05.06. 최
-void makeASCTextFile(string fpn, string allHeader, double** array2D,
-	int arrayLength_x, int arrayLength_y,
-	int precision, int nodataValue)
-{
-	fs::path fpn_out = fs::path(fpn);
-	std::ofstream outfile;
-	outfile.open(fpn_out, ios::out);
-	outfile << allHeader << "\n";
-	int isBigSize = 0;
-	//int BigSizeThreshold = 200000000; //2억개 기준
-	if (arrayLength_x * arrayLength_y > CONST_BIG_SIZE_ARRAY_THRESHOLD) { isBigSize = 1; }
-	string formatString = "%." + to_string(precision) + "f ";
-	const char* formatStr = formatString.c_str();
-	//char* aaa= (char*)malloc(sizeof(char) * 10 * arrayLength_x + 1);
-	if (isBigSize == 0) {
-		string allLInes = "";
-		for (int nr = 0; nr < arrayLength_y; nr++) {
-			for (int nc = 0; nc < arrayLength_x; nc++) {
-				char vchar[20];
-				if (array2D[nc][nr] == nodataValue
-					|| array2D[nc][nr] == 0) {
-					sprintf(vchar, "%d ", (int)array2D[nc][nr]);
-				}
-				else {
-					sprintf(vchar, formatStr, array2D[nc][nr]);
-				}
-				allLInes += vchar;
-			}
-			allLInes +='\n';
-		}
-		outfile << allLInes;
-		outfile.close();
-	}
-	else {
-		string lines = "";
-		for (int nr = 0; nr < arrayLength_y; nr++) {
-			for (int nc = 0; nc < arrayLength_x; nc++) {
-				char s1[20];
-				if (array2D[nc][nr] == nodataValue
-					|| array2D[nc][nr] == 0) {
-					sprintf(s1, "%d ", (int) array2D[nc][nr]);
-				}
-				else {
-					sprintf(s1, formatStr, array2D[nc][nr]);
-				}
-				lines += s1;
-			}
-			lines += "\n";
-			if (nr % 200 == 0) {
-				outfile << lines;
-				lines = "";
-			}			
-		}
-		outfile << lines;
-		outfile.close();
-	}
-}
-
-void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
-	double** array2D,
-	int colxNum, int rowyNum, rendererType rt,
-	double rendererMaxV, double nodataV)
-{
-	int iw = colxNum;// *100;
-	int ih = rowyNum;// *100;
-	int numThread = 0;
-	numThread = omp_get_max_threads();
-	omp_set_num_threads(numThread);
-	bitmap_image img(iw, ih);
-	img.clear();
-	image_drawer draw(img);
-	if (rt == rendererType::Depth) {
-#pragma omp parallel for 
-		for (int y = 0; y < img.height(); ++y) {
-			for (int x = 0; x < img.width(); ++x) {
-				double av = array2D[x][y];
-				if (av == nodataV) {
-					av = 0;
-				}
-				else {
-					if (av > rendererMaxV) {
-						av = rendererMaxV;
-					}
-					if (av < 0) {
-						av = 0;
-					}
-				}
-				rgb_t col;
-				if (av == 0) {
-					col = { 255, 217, 170 };
-				}
-				else {
-					int v = 490 + (int)(av / rendererMaxV * 500.0);// hsv_colormap 에서 490부터 사용. 990까지 사용
-					col = hsv_colormap[v];
-				}
-				img.set_pixel(x, y, col.red, col.green, col.blue);
-			}
-		}
-	}
-	else if (rt == rendererType::Risk) {
-#pragma omp parallel for 
-		for (int y = 0; y < img.height(); ++y) {
-			for (int x = 0; x < img.width(); ++x) {
-				double av = array2D[x][y];
-				rgb_t col;
-				if (av == nodataV) {
-					col = { 255, 255, 255 };
-				}
-				else {
-					if (av > rendererMaxV) {
-						av = rendererMaxV;
-					}
-					if (av < 0) {
-						av = 0;
-					}
-					int v = 380 + (int)(av / rendererMaxV * 610.0);// hsv_colormap 에서 380부터 사용. 990까지 사용
-					col = hsv_colormap[v];
-				}
-				img.set_pixel(x, y, col.red, col.green, col.blue);
-			}
-		}
-	}
-	img.save_image(imgFPNtoMake);
-}
-
-
 
 // key별 속성을 vector<string>으로 저장해서 반환
 map <int, vector<string>> readVatFile(string vatFPN, char seperator)
@@ -1529,9 +1384,6 @@ bool writeNewLog(fs::path fpn, string printText, int bprintFile, int bprintConso
 		cout << printText;
 	}
 	if (bprintFile > 0) {
-		//time_t now = time(0);
-		//tm ltm;
-		//localtime_s(&ltm, &now);
 		COleDateTime tnow = COleDateTime::GetCurrentTime();
 		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
@@ -1556,9 +1408,6 @@ bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsol
 		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
-		//time_t now = time(0);
-		//tm ltm;
-		//localtime_s(&ltm, &now);
 		COleDateTime tnow = COleDateTime::GetCurrentTime();
 		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
@@ -1594,9 +1443,6 @@ bool writeLog(fs::path fpn, char* printText, int bprintFile, int bprintConsole)
 		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
-		//time_t now = time(0);
-		//tm ltm;
-		//localtime_s(&ltm, &now);
 		COleDateTime tnow = COleDateTime::GetCurrentTime();
 		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
@@ -1619,9 +1465,6 @@ bool writeLog(fs::path fpn, string printText, int bprintFile, int bprintConsole)
 		else if (fs::exists(fpn) == true) {
 			outfile.open(fpn, ios::app);
 		}
-		//time_t now = time(0);
-		//tm ltm;
-		//localtime_s(&ltm, &now);
 		COleDateTime tnow = COleDateTime::GetCurrentTime();
 		string nows = timeToString(tnow, 
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);

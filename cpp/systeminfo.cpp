@@ -1,5 +1,4 @@
 // This source code was referenced from https://github.com/tlewiscpp/SystemInfo
-#include "stdafx.h"
 #include "cpuinfo.h"
 #include "cpuinfodelegate.h" 
 #include "gpuinfo.h"
