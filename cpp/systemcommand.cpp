@@ -17,7 +17,7 @@
  *    Public license along with libraryprojects                         *
  *    If not, see <http://www.gnu.org/licenses/>                        *
  ***********************************************************************/
-
+#include "stdafx.h"
 #include "systemcommand.h" 
 
 
