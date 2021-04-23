@@ -815,7 +815,6 @@ map <int, vector<string>> readVatFile(string vatFPN, char seperator)
 
 string replaceText(string inText, string textToFind, string textToRepalce)
 {
-	//string s;
 	int idx = 0;
 	while (idx !=-1) {
 		idx = inText.find(textToFind, 0);
@@ -828,15 +827,6 @@ string replaceText(string inText, string textToFind, string textToRepalce)
 			inText;
 		}
 	}
-	//string s;
-	//int idxStart = inText.find(textToFind, 0);
-	//if (idxStart > 0) {
-	//	int length = textToFind.length();
-	//	s = inText.replace(idxStart, length, textToRepalce);
-	//}
-	//else {
-	//	s = inText;
-	//}
 	return inText;
 }
 
@@ -1079,6 +1069,13 @@ string * splitToStringArray(string stringToBeSplitted, char delimeter, bool remo
 	copy(splittedValues.begin(), splittedValues.end(), values);
 	return values;
 }
+
+//Comma를 포함하는 string 숫자를 double로 변환
+double stod_c(string inst) {
+	string tmp = replaceText(inst, ",", "");
+	return(stod(tmp));
+}
+
 
 char* stringToCharP(string inString)
 {

@@ -172,6 +172,7 @@ map <int, vector<string>> readVatFile(string vatFPN, char seperator);
 string replaceText(string inText, string textToFind, string textToRepalce);
 
 tm secToHHMMSS(long sec);
+double stod_c(string inst);//Comma를 포함하는 string 숫자를 double로 변환
 tm stringToDateTime(string yyyymmddHHMM);
 tm stringToDateTime2(string yyyy_mm_dd__HHcolonMM);
 vector<double> splitToDoubleVector(string strToSplit, 
