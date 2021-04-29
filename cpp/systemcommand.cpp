@@ -18,11 +18,8 @@
  *    If not, see <http://www.gnu.org/licenses/>                        *
  ***********************************************************************/
 #include "stdafx.h"
-#include "systemcommand.h" 
-
 
 const int SystemCommand::_DEFAULT_MAX_OUTPUT = 2147483647;
-
 
 SystemCommand::SystemCommand(std::initializer_list<std::string> command) :
 	_command{ *std::begin(command) },
@@ -30,10 +27,7 @@ SystemCommand::SystemCommand(std::initializer_list<std::string> command) :
 	_hasError{ false },
 	_repeatCommand{ false }
 {
-
-
 }
-
 
 SystemCommand::SystemCommand() :
 	_command{ "" },
@@ -41,10 +35,7 @@ SystemCommand::SystemCommand() :
 	_hasError{ false },
 	_repeatCommand{ false }
 {
-
-
 }
-
 
 SystemCommand::SystemCommand(const std::string &command) :
 	_command{ command },
@@ -52,10 +43,7 @@ SystemCommand::SystemCommand(const std::string &command) :
 	_hasError{ false },
 	_repeatCommand{ false }
 {
-
-
 }
-
 
 SystemCommand::SystemCommand(const std::string &command, int maxOutput) :
 	_command{ command },
@@ -63,18 +51,12 @@ SystemCommand::SystemCommand(const std::string &command, int maxOutput) :
 	_hasError{ false },
 	_repeatCommand{ false }
 {
-
-
 }
-
-
-
 
 void SystemCommand::printCommand()
 {
 	std::cout << this->_command << std::endl;
 }
-
 
 void SystemCommand::insertIntoCommand(int position, const std::string &stringToInsert)
 {
@@ -85,7 +67,6 @@ void SystemCommand::insertIntoCommand(int position, const std::string &stringToI
 	this->_repeatCommand = false;
 }
 
-
 void SystemCommand::insertIntoCommand(int position, char charToInsert)
 {
 	std::string temp = "";
@@ -93,24 +74,20 @@ void SystemCommand::insertIntoCommand(int position, char charToInsert)
 	this->insertIntoCommand(position, temp);
 }
 
-
 int SystemCommand::maxOutput()
 {
 	return this->_maxOutput;
 }
-
 
 std::string SystemCommand::command()
 {
 	return this->_command;
 }
 
-
 bool SystemCommand::hasError()
 {
 	return this->_hasError;
 }
-
 
 void SystemCommand::appendToCommand(const std::string &stringToAppend)
 {
@@ -118,12 +95,10 @@ void SystemCommand::appendToCommand(const std::string &stringToAppend)
 	this->_repeatCommand = false;
 }
 
-
 int SystemCommand::returnValue()
 {
 	return this->_returnValue;
 }
-
 
 void SystemCommand::setCommand(const std::string &command)
 {
@@ -134,12 +109,10 @@ void SystemCommand::setCommand(const std::string &command)
 	this->_outputAsVector.clear();
 }
 
-
 void SystemCommand::setMaxOutput(int maxOutput)
 {
 	this->_maxOutput = maxOutput;
 }
-
 
 std::string SystemCommand::outputAsString()
 {
@@ -150,25 +123,21 @@ std::string SystemCommand::outputAsString()
 	return returnString;
 }
 
-
 void SystemCommand::stripShellControlCharactersFromCommand()
 {
 	//TODO: Implement 
 	return;
 }
 
-
 std::vector<std::string> SystemCommand::outputAsVector()
 {
 	return this->_outputAsVector;
 }
 
-
 void SystemCommand::execute()
 {
 	this->systemCommandLaunch(_WITH_PIPE);
 }
-
 
 std::vector<std::string> SystemCommand::executeAndWaitForOutputAsVector()
 {
@@ -176,12 +145,10 @@ std::vector<std::string> SystemCommand::executeAndWaitForOutputAsVector()
 	return this->_outputAsVector;
 }
 
-
 void SystemCommand::executeWithoutPipe()
 {
 	this->systemCommandLaunch(_WITHOUT_PIPE);
 }
-
 
 std::string SystemCommand::stripAllFromString(const std::string &stringToStrip, const std::string &whatToStrip)
 {
@@ -194,9 +161,6 @@ std::string SystemCommand::stripAllFromString(const std::string &stringToStrip, 
 	}
 	return returnString;
 }
-
-
-
 
 std::string SystemCommand::stripFromString(const std::string &stringToStrip, const std::string &whatToStrip)
 {
@@ -217,7 +181,6 @@ std::string SystemCommand::stripFromString(const std::string &stringToStrip, con
 	return returnString;
 }
 
-
 void SystemCommand::stripPipeFromCommand()
 {
 #if defined(_WIN32) && defined(_MSC_VER) 
@@ -229,21 +192,16 @@ void SystemCommand::stripPipeFromCommand()
 #endif 
 }
 
-
-
-
 std::string SystemCommand::executeAndWaitForOutputAsString()
 {
 	this->systemCommandLaunch(_WITH_PIPE);
 	return this->outputAsString();
 }
 
-
 int SystemCommand::sizeOfOutput()
 {
 	return this->_sizeOfOutput;
 }
-
 
 void SystemCommand::verifyValidMaxOutput()
 {
@@ -251,7 +209,6 @@ void SystemCommand::verifyValidMaxOutput()
 		_maxOutput = _DEFAULT_MAX_OUTPUT;
 	}
 }
-
 
 FILE* SystemCommand::popenHandler(const std::string &directory, const std::string &fileMode)
 {
@@ -261,7 +218,6 @@ FILE* SystemCommand::popenHandler(const std::string &directory, const std::strin
 	return popen(directory.c_str(), fileMode.c_str());
 #endif 
 }
-
 
 int SystemCommand::pcloseHandler(FILE *filePtr)
 {
@@ -273,7 +229,6 @@ int SystemCommand::pcloseHandler(FILE *filePtr)
 	return returnValue == -1 ? -1 : returnValue / 256;
 #endif 
 }
-
 
 void SystemCommand::systemCommandLaunch(bool withPipe)
 {

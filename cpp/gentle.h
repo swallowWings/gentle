@@ -2,10 +2,8 @@
 #include <iostream>
 #include <stdio.h>
 #include <map>
-#include<fstream>
 #include <filesystem>
 #include<ATLComTime.h>
-#include <windows.h>
 #include <omp.h>
 
 #include "bitmap_image.hpp"
@@ -155,15 +153,6 @@ bool isNumeric(string instr);
 bool isNumericDbl(string instr);
 bool isNumericInt(string instr);
 
-//void makeASCTextFile(string fpn, string allHeader, double** array2D,
-//	int arrayLength_x, int arrayLength_y,
-//	int precision, int nodataValue);
-
-//void makeBMPFileUsingArrayGTzero_InParallel(string imgFPNtoMake,
-//	double** array2D,
-//	int colxNum, int rowyNum, rendererType rt,
-//    double rendererMaxV = 0, 	double nodataV = -9999);
-
 vector<double> readTextFileToDoubleVector(string fpn);
 vector<float> readTextFileToFloatVector(string fpn);
 vector<string> readTextFileToStringVector(string fpn);
@@ -172,7 +161,6 @@ map <int, vector<string>> readVatFile(string vatFPN, char seperator);
 string replaceText(string inText, string textToFind, string textToRepalce);
 
 tm secToHHMMSS(long sec);
-double stod_c(string inst);//Comma를 포함하는 string 숫자를 double로 변환
 tm stringToDateTime(string yyyymmddHHMM);
 tm stringToDateTime2(string yyyy_mm_dd__HHcolonMM);
 vector<double> splitToDoubleVector(string strToSplit, 
@@ -243,6 +231,12 @@ public:
 };
 
 // ========== 여기부터  inline 함수 =========
+//Comma를 포함하는 string 숫자를 double로 변환
+inline double stod_c(string inst) {
+	string tmp = replaceText(inst, ",", "");
+	return(stod(tmp));
+}
+
 inline std::string trim(std::string& str)
 {
 	str.erase(0, str.find_first_not_of(' '));       //prefixing spaces

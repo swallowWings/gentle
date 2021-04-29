@@ -1,25 +1,7 @@
 #include "stdafx.h"
-#include <iostream>
-#include <string>
-#include <stdio.h>
-#include <intrin.h>
-#include <io.h>
-#include <stdlib.h>
-#include <sstream>
-#include <omp.h>
-#include<map>
-#include <time.h>
-#include<ATLComTime.h>
-#include <filesystem>
-#include <algorithm>
-
-#include "cpuinfodelegate.h"
-#include "gpuinfodelegate.h"
-#include "bitmap_image.hpp"
-
 #include "gentle.h"
 
-
+// 이부분 빠지면, std::numeric_limits<int>::max() 에서 애러 난다.
 #ifdef _WIN32
 	#include <windows.h>
 #elif MACOS
@@ -31,7 +13,7 @@
 
 using namespace std;
 namespace fs = std::filesystem;
-extern fs::path fpnLog;
+//extern fs::path fpnLog;
 ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 {
 	fs::path fpnASC = fpn_ascRasterFile;
@@ -1070,20 +1052,12 @@ string * splitToStringArray(string stringToBeSplitted, char delimeter, bool remo
 	return values;
 }
 
-//Comma를 포함하는 string 숫자를 double로 변환
-double stod_c(string inst) {
-	string tmp = replaceText(inst, ",", "");
-	return(stod(tmp));
-}
-
-
 char* stringToCharP(string inString)
 {
 	std::vector<char> cpv(inString.begin(), inString.end());
 	cpv.push_back('\0');
 	return &cpv[0];
 }
-
 
 char** stringVectorToCharPP(vector<string> inStrV)
 {

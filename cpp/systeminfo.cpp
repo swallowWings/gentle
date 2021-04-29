@@ -1,9 +1,5 @@
 // This source code was referenced from https://github.com/tlewiscpp/SystemInfo
 #include "stdafx.h"
-#include "cpuinfo.h"
-#include "cpuinfodelegate.h" 
-#include "gpuinfo.h"
-#include "gpuinfodelegate.h"
 
 const std::string CPUInfo::TEMPERATURE_QUERY_STRING = "wmic /namespace:\\\\root\\wmi PATH MSAcpi_ThermalZoneTemperature get CurrentTemperature";
 const std::string CPUInfo::TEMPERATURE_ERROR_IDENTIFIER_STRING = "ERROR:";
