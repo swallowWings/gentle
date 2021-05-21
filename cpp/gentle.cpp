@@ -13,9 +13,10 @@
 
 using namespace std;
 namespace fs = std::filesystem;
-//extern fs::path fpnLog;
 ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 {
+	//clock_t  ts, tf;
+	//long tc = 0;
 	fs::path fpnASC = fpn_ascRasterFile;
 	ifstream ascFile(fpnASC);
 	if (ascFile.is_open()) {
@@ -52,130 +53,132 @@ ascRasterFile::ascRasterFile(string fpn_ascRasterFile)
 	if (isBigSize == false) {
 		vector<string> allLinesv = readTextFileToStringVector(fpn_ascRasterFile);
 		int lyMax = dataStaringIndex + header.nRows ; //(int)allLinesv.size();
-		// //serial이 parallel 보다 2배 이상 느리다.
-		//for (int ly = dataStaringIndex; ly < lyMax; ++ly) {
-		//	vector<string> values = splitToStringVector(allLinesv[ly], ' ');
-		//	int y = ly - dataStaringIndex;
-		//	int nX = header.nCols;// (int)values.size();
-		//	for (int x = 0; x < nX; ++x) {
-		//		writeLog(fpnLog, "(x, y), value : " + to_string(x) + ", " + to_string(y) + ", " + values[x] + '\n', 1, 1);
-		//		if (isNumeric(values[x]) == true) {
-		//			valuesFromTL[x][y] = stod(values[x]);
-		//		}
-		//		else {
-		//			valuesFromTL[x][y] = header.nodataValue;
-		//		}
-		//		if (valuesFromTL[x][y] != header.nodataValue) {
-		//			cellCount_notNull++;
-		//			value_sum = value_sum + valuesFromTL[x][y];
-		//			if (valuesFromTL[x][y] > value_max) {
-		//				value_max = valuesFromTL[x][y];
-		//			}
-		//			if (valuesFromTL[x][y] < value_min) {
-		//				value_min = valuesFromTL[x][y];
-		//			}
-		//		}
-		//		writeLog(fpnLog, "(x, y) : " + to_string(x) + ", " + to_string(y) + " completed...\n", 1, 1);
-		//	}
-		//}
 
-////#pragma omp parallel
-////		{
-////			double min_local = DBL_MAX;
-////			double sum_local = 0;
-////			int count_local = 0;
-////			double max_local = DBL_MIN;
-////#pragma omp parallel for 
-////			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
-////				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
-////				int y = ly - dataStaringIndex;
-////				int nX = (int)values.size();
-////				for (int x = 0; x < nX; ++x) {
-////					if (isNumeric(values[x]) == true) {
-////						valuesFromTL[x][y] = stod(values[x]);
-////					}
-////					else {
-////						valuesFromTL[x][y] = header.nodataValue;
-////					}
-////					if (valuesFromTL[x][y] != header.nodataValue) {
-////						count_local = count_local + 1;
-////						sum_local = sum_local + valuesFromTL[x][y];
-////						if (valuesFromTL[x][y] > max_local) {
-////							max_local = valuesFromTL[x][y];
-////						}
-////						if (valuesFromTL[x][y] < min_local) {
-////							min_local = valuesFromTL[x][y];
-////						}
-////					}
-////				}
-////			}
-////#pragma omp critical
-////			{
-////				if (value_max < max_local) {
-////					value_max = max_local;
-////				}
-////				if (value_min > min_local) {
-////					value_min = min_local;
-////				}
-////				value_sum = value_sum + sum_local;
-////				cellCount_notNull = cellCount_notNull + count_local;
-////			}
-////		}
-
-		// 병렬이 serial 보다 2배 이상 빠르다. // 가장 좋다.
-		int numThread = 0;
-		numThread = omp_get_max_threads();
-		omp_set_num_threads(numThread);
-		double* min_local = new double[numThread];
-		double* max_local = new double[numThread];
-		double* sum_local = new double[numThread];
-		int* count_local = new int[numThread];
-#pragma omp parallel
-		{
-			int nth = omp_get_thread_num();
-			min_local[nth] = DBL_MAX;
-			sum_local[nth] = 0;
-			count_local[nth] = 0;
-			max_local[nth] = DBL_MIN;
-#pragma omp for
-			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
-				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
-				int y = ly - dataStaringIndex;
-				int nX = header.nCols;// (int)values.size();
-				for (int x = 0; x < nX; ++x) {
-					if (isNumeric(values[x]) == true) {
-						valuesFromTL[x][y] = stod(values[x]);
+       //serial이 parallel 보다 2배 이상 느리다. 
+	   // 대용량 asc에서는 serial 이 4배정도 더 빠르네.. 2021.05.07. 진주시  27,920,416 개 셀
+		for (int ly = dataStaringIndex; ly < lyMax; ++ly) {
+			vector<string> values = splitToStringVector(allLinesv[ly], ' ');
+			int y = ly - dataStaringIndex;
+			int nX = header.nCols;// (int)values.size();
+			for (int x = 0; x < nX; ++x) {
+				if (isNumeric(values[x]) == true) {
+					valuesFromTL[x][y] = stod(values[x]);
+				}
+				else {
+					valuesFromTL[x][y] = header.nodataValue;
+				}
+				if (valuesFromTL[x][y] != header.nodataValue) {
+					cellCount_notNull++;
+					value_sum = value_sum + valuesFromTL[x][y];
+					if (valuesFromTL[x][y] > value_max) {
+						value_max = valuesFromTL[x][y];
 					}
-					else {
-						valuesFromTL[x][y] = header.nodataValue;
-					}
-					if (valuesFromTL[x][y] != header.nodataValue) {
-						count_local[nth] = count_local[nth] + 1;
-						sum_local[nth] = sum_local[nth] + valuesFromTL[x][y];
-						if (valuesFromTL[x][y] > max_local[nth]) {
-							max_local[nth] = valuesFromTL[x][y];
-						}
-						if (valuesFromTL[x][y] < min_local[nth]) {
-							min_local[nth] = valuesFromTL[x][y];
-						}
+					if (valuesFromTL[x][y] < value_min) {
+						value_min = valuesFromTL[x][y];
 					}
 				}
 			}
 		}
-		for (int i = 0; i < numThread; ++i) {
-			if (value_max < max_local[i]) {
-				value_max = max_local[i];
-			}
-			if (value_min > min_local[i]) {
-				value_min = min_local[i];
-			}
-			value_sum = value_sum + sum_local[i];
-			cellCount_notNull = cellCount_notNull + count_local[i];
-		}
-		delete[] min_local;
-		delete[] max_local;
-		delete[] sum_local;
-		delete[] count_local;
+
+//   // 대용량 asc에서는 serial 이 4배정도 더 빠르네.. 2021.05.07. 진주시  27,920,416 개 셀
+//#pragma omp parallel
+//		{
+//			double min_local = DBL_MAX;
+//			double sum_local = 0;
+//			int count_local = 0;
+//			double max_local = DBL_MIN;
+//#pragma omp parallel for 
+//			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
+//				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
+//				int y = ly - dataStaringIndex;
+//				int nX = header.nCols;;
+//				for (int x = 0; x < nX; ++x) {
+//					if (isNumeric(values[x]) == true) {
+//						valuesFromTL[x][y] = stod(values[x]);
+//					}
+//					else {
+//						valuesFromTL[x][y] = header.nodataValue;
+//					}
+//					if (valuesFromTL[x][y] != header.nodataValue) {
+//						count_local = count_local + 1;
+//						sum_local = sum_local + valuesFromTL[x][y];
+//						if (valuesFromTL[x][y] > max_local) {
+//							max_local = valuesFromTL[x][y];
+//						}
+//						if (valuesFromTL[x][y] < min_local) {
+//							min_local = valuesFromTL[x][y];
+//						}
+//					}
+//				}
+//			}
+//#pragma omp critical
+//			{
+//				if (value_max < max_local) {
+//					value_max = max_local;
+//				}
+//				if (value_min > min_local) {
+//					value_min = min_local;
+//				}
+//				value_sum = value_sum + sum_local;
+//				cellCount_notNull = cellCount_notNull + count_local;
+//			}
+//		}
+
+//		// 병렬이 serial 보다 2배 이상 빠르다. // 가장 좋다.
+//     // 대용량 asc에서는 serial 이 4배정도 더 빠르네.. 2021.05.07. 진주시  27,920,416 개 셀
+//		int numThread = 2;
+//		omp_set_num_threads(numThread);
+//		numThread = omp_get_max_threads();
+//		double* min_local = new double[numThread];
+//		double* max_local = new double[numThread];
+//		double* sum_local = new double[numThread];
+//		int* count_local = new int[numThread];
+//#pragma omp parallel
+//		{
+//			int nth = omp_get_thread_num();
+//			min_local[nth] = DBL_MAX;
+//			sum_local[nth] = 0;
+//			count_local[nth] = 0;
+//			max_local[nth] = DBL_MIN;
+//#pragma omp for
+//			for (int ly = header.dataStartingLineIndex; ly < lyMax; ++ly) {
+//				vector<string> values = splitToStringVector(allLinesv[ly], ' ');
+//				int y = ly - dataStaringIndex;
+//				int nX = header.nCols;// (int)values.size();
+//				for (int x = 0; x < nX; ++x) {
+//					if (isNumeric(values[x]) == true) {
+//						valuesFromTL[x][y] = stod(values[x]);
+//					}
+//					else {
+//						valuesFromTL[x][y] = header.nodataValue;
+//					}
+//					if (valuesFromTL[x][y] != header.nodataValue) {
+//						count_local[nth] = count_local[nth] + 1;
+//						sum_local[nth] = sum_local[nth] + valuesFromTL[x][y];
+//						if (valuesFromTL[x][y] > max_local[nth]) {
+//							max_local[nth] = valuesFromTL[x][y];
+//						}
+//						if (valuesFromTL[x][y] < min_local[nth]) {
+//							min_local[nth] = valuesFromTL[x][y];
+//						}
+//					}
+//				}
+//			}
+//		}
+//		for (int i = 0; i < numThread; ++i) {
+//			if (value_max < max_local[i]) {
+//				value_max = max_local[i];
+//			}
+//			if (value_min > min_local[i]) {
+//				value_min = min_local[i];
+//			}
+//			value_sum = value_sum + sum_local[i];
+//			cellCount_notNull = cellCount_notNull + count_local[i];
+//		}
+//		delete[] min_local;
+//		delete[] max_local;
+//		delete[] sum_local;
+//		delete[] count_local;
 	}
 	else {
 		int nl = 0;
@@ -360,9 +363,6 @@ void appendTextToTextFile(string fpn, string textToAppend)
 	outfile.open(fpn, ios::app);
 	outfile << textToAppend;
 	outfile.close();
-	//FILE* fp = fopen(fpn.c_str(), "a");
-	//fprintf(fp, textToAppend.c_str());
-	//fclose(fp);
 }
 
 bool compareNaturalOrder(const std::string& a, const std::string& b) 
@@ -756,44 +756,6 @@ map <int, vector<string>> readVatFile(string vatFPN, char seperator)
 	}
 	return values;
 }
-
-//bool removeFolder(string filePath)
-//{
-//	//if (access(filePath.c_str(), 0) == 0) {
-//	//	// 파일이 있다.
-//		//fs::remove_all(filePath);
-//		//fs::remove(filePath);
-//	//}
-//	//else {
-//	//	//파일이 없다.
-//		//fs::remove(filePath);
-//	//}
-//
-//	CString fp(filePath.c_str());
-//	if (fp.IsEmpty()) {
-//		RemoveDirectory(fp);
-//	}
-//	else {
-//		CFileFind   ff;
-//		BOOL   bFound = ff.FindFile(fp + _T("\\*"), 0);
-//		while (bFound) {
-//			bFound = ff.FindNextFile();
-//			if (ff.GetFileName() == _T(".") || ff.GetFileName() == _T(".."))
-//				continue;
-//			SetFileAttributes(ff.GetFilePath(), FILE_ATTRIBUTE_NORMAL);
-//			if (ff.IsDirectory()==true) {
-//				DeleteDirectory(ff.GetFilePath());
-//				RemoveDirectory(ff.GetFilePath());
-//			}
-//			else {
-//				DeleteFile(ff.GetFilePath());
-//			}
-//		}
-//		ff.Close();
-//		RemoveDirectory(fp);
-//	}
-//	return true;
-//}
 
 string replaceText(string inText, string textToFind, string textToRepalce)
 {
@@ -1305,10 +1267,6 @@ bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintCon
 		printf(printText);
 	}
 	if (bprintFile > 0) {
-		//time_t now = time(0);
-		////tm *ltm = localtime(&now);
-		//tm ltm;
-		//localtime_s(&ltm, &now);
 		COleDateTime tnow = COleDateTime::GetCurrentTime();
 		string nows = timeToString(tnow, 
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
@@ -1316,10 +1274,6 @@ bool writeNewLog(const char* fpn, char* printText, int bprintFile, int bprintCon
 		outfile.open(fpn, ios::out);
 		outfile << nows + " " + printText;
 		outfile.close();
-		//FILE* outFile;
-		//outFile = fopen(fpn, "w");
-		//fprintf(outFile, printText);
-		//fclose(outFile);
 	}
 	return true;
 }
@@ -1330,9 +1284,6 @@ bool writeNewLog(fs::path fpn, char* printText, int bprintFile, int bprintConsol
 		printf(printText);
 	}
 	if (bprintFile > 0)	{
-		//time_t now = time(0);
-		//tm ltm;
-		//localtime_s(&ltm, &now);
 		COleDateTime tnow = COleDateTime::GetCurrentTime();
 		string nows = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
@@ -1385,18 +1336,6 @@ bool writeLog(const char* fpn, char* printText, int bprintFile, int bprintConsol
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		outfile << nows + " " + printText;
 		outfile.close();
-		//FILE* outFile;
-		//int nResult = access(fpn, 0);
-		//if (nResult == -1)
-		//{
-		//	outFile = fopen(fpn, "w");
-		//}
-		//else if (nResult == 0)
-		//{
-		//	outFile = fopen(fpn, "a");
-		//}
-		//fprintf(outFile, printText);
-		//fclose(outFile);
 	}
 	return true;
 }
