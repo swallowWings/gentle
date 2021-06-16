@@ -16,6 +16,7 @@ namespace gentle
             COMMA,
             SPACE,
             TAB,
+            FORWARD_SLASH,
             ALL,
             NONE
         };
@@ -373,6 +374,9 @@ namespace gentle
                     break;
                 case cTextFile.ValueSeparator.SPACE:
                     sepArray = new string[] { " " };
+                    break;
+                case cTextFile.ValueSeparator.FORWARD_SLASH:
+                    sepArray = new string[] { "/" };
                     break;
                 case cTextFile.ValueSeparator.TAB:
                     sepArray = new string[] { "\r\n" };

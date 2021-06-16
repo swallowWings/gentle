@@ -474,7 +474,7 @@ CPUsInfo getCPUinfo()
 	int CPUCount = 1;
 	int totalLP = 0;
 	string infoStr;
-	infoStr ="  " + std::to_string(cpuInfo->numberOfCPUInfoItems()) + " CPU(s) installed.\n";
+	infoStr =" " + std::to_string(cpuInfo->numberOfCPUInfoItems()) + " CPU(s) installed.\n";
 	for (std::vector<CPUInfo>::iterator iter = cpuInfoVector.begin(); iter != cpuInfoVector.end(); ++iter) 
 	{
 		//std::cout << "CPU Manufacturer = " << iter->manufacturer() << std::endl;
@@ -592,7 +592,7 @@ string getGPUinfo()
 	//GetSystemInfo(&sysInfo);
 	//int CPUCount = 1;
 	string infoStr;
-	infoStr = "  " + std::to_string(gpuInfo->numberOfGPUInfoItems()) + " GPU(s) installed.\n";
+	infoStr = " " + std::to_string(gpuInfo->numberOfGPUInfoItems()) + " GPU(s) installed.\n";
 	int gpuCount = 1;
 	for (std::vector<GPUInfo>::const_iterator iter = gpuInfoVector.begin(); iter != gpuInfoVector.end(); ++iter)
 	{
@@ -782,6 +782,7 @@ vector<double> readTextFileToDoubleVector(string fpn)
 	while (!txtFile.eof()) {
 		getline(txtFile, aline);
 		aline = trim(aline);
+		aline = replaceText(aline, ",", "");
 		if (aline.size() > 0) {
 			if (isNumeric(aline) == true) {
 				linesv.push_back(stod(aline));
@@ -804,6 +805,7 @@ vector<float> readTextFileToFloatVector(string fpn)
 	while (!txtFile.eof()) {
 		getline(txtFile, aline);
 		aline = trim(aline);
+		aline = replaceText(aline, ",", "");
 		if (aline.size() > 0) {
 			if (isNumeric(aline) == true) {
 				linesv.push_back(stof(aline));
