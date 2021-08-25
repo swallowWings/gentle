@@ -91,13 +91,13 @@ enum class rainfallDataType
 	TextFileASCgrid_mmPhr
 };
 
-// 1:Discharge, 2:Depth, 3:Height, 4:None
+// 1:Discharge, 2:Depth, 3:WaterLevel, 4:None
 enum class conditionDataType
 {
 	NoneCD,   //0
 	Discharge, // 1
 	Depth,      //2
-	Height     //3
+	WaterLevel     //3
 } ;
 
 enum class fileOrConstant

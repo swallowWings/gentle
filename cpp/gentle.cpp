@@ -473,29 +473,32 @@ CPUsInfo getCPUinfo()
 	GetSystemInfo(&sysInfo);
 	int CPUCount = 1;
 	int totalLP = 0;
-	string infoStr;
-	infoStr =" " + std::to_string(cpuInfo->numberOfCPUInfoItems()) + " CPU(s) installed.\n";
-	for (std::vector<CPUInfo>::iterator iter = cpuInfoVector.begin(); iter != cpuInfoVector.end(); ++iter) 
-	{
-		//std::cout << "CPU Manufacturer = " << iter->manufacturer() << std::endl;
-		//std::cout << "Current CPU Clock Speed = " << iter->currentClockSpeed() << std::endl;
-		//std::cout << "CPU Architecture = " << iter->architecture() << std::endl;
-		//std::cout << "CPU L2 Cache Size = " << iter->L2CacheSize() << std::endl;
-		//std::cout << "CPU L3 Cache Size = " << iter->L3CacheSize() << std::endl;
-		//std::cout << "Current CPU Temperature = " << iter->currentTemperature() << std::endl;
-
-		infoStr += "  CPU #" + to_string(CPUCount) + ".\n";
-		infoStr += "    CPU name : " + iter->name() + '\n';
-		infoStr += "    Number of CPU cores : " + iter->numberOfCores() + '\n';
-		infoStr += "    Number of logical processors : " + std::to_string(sysInfo.dwNumberOfProcessors) + '\n';
-		CPUCount++;
-		totalLP = totalLP + stoi(to_string(sysInfo.dwNumberOfProcessors));
-	}
+	string infoStr="";
 	CPUsInfo cpusi;
-	cpusi.infoString = infoStr;
-	cpusi.numberOfCPUs = cpuInfo->numberOfCPUInfoItems();
-	cpusi.totalNumOfLP = totalLP;
-	delete cpuInfo;
+	if (cpuInfo->numberOfCPUInfoItems() > 0) {
+		infoStr = " " + std::to_string(cpuInfo->numberOfCPUInfoItems()) + " CPU(s) installed.\n";
+
+		for (std::vector<CPUInfo>::iterator iter = cpuInfoVector.begin(); iter != cpuInfoVector.end(); ++iter)
+		{
+			//std::cout << "CPU Manufacturer = " << iter->manufacturer() << std::endl;
+			//std::cout << "Current CPU Clock Speed = " << iter->currentClockSpeed() << std::endl;
+			//std::cout << "CPU Architecture = " << iter->architecture() << std::endl;
+			//std::cout << "CPU L2 Cache Size = " << iter->L2CacheSize() << std::endl;
+			//std::cout << "CPU L3 Cache Size = " << iter->L3CacheSize() << std::endl;
+			//std::cout << "Current CPU Temperature = " << iter->currentTemperature() << std::endl;
+
+			infoStr += "  CPU #" + to_string(CPUCount) + ".\n";
+			infoStr += "    CPU name : " + iter->name() + '\n';
+			infoStr += "    Number of CPU cores : " + iter->numberOfCores() + '\n';
+			infoStr += "    Number of logical processors : " + std::to_string(sysInfo.dwNumberOfProcessors) + '\n';
+			CPUCount++;
+			totalLP = totalLP + stoi(to_string(sysInfo.dwNumberOfProcessors));
+		}
+		cpusi.infoString = infoStr;
+		cpusi.numberOfCPUs = cpuInfo->numberOfCPUInfoItems();
+		cpusi.totalNumOfLP = totalLP;
+		delete cpuInfo;
+	}
 	return cpusi;
 }
 

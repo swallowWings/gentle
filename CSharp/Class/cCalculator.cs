@@ -220,7 +220,73 @@ namespace gentle
             return resultArr;
         }
 
+
+        //public static double[,] calculate2DArryUsingCondition(string ConOperator, bool is1ASC, bool is2ASC, bool isTasc, bool isFasc,
+        //  double[,] asc1 = null, double[,] asc2 = null, double[,] ascT = null, double[,] ascF = null,
+        //  double value1 = 0, double value2 = 0, double valueT = 0, double valueF = 0,
+        //  double nodataValue = -9999)
+        //{
+        //    double[,] resultArr = null;
+        //    if (is1ASC == true)
+        //    { resultArr = new double[asc1.GetLength(0), asc1.GetLength(1)]; }
+        //    else
+        //    { resultArr = new double[asc2.GetLength(0), asc2.GetLength(1)]; }
+
+        //    int ny = resultArr.GetLength(1);
+        //    int nx = resultArr.GetLength(0);
+        //    ParallelOptions options = new ParallelOptions();
+        //    options.MaxDegreeOfParallelism = Environment.ProcessorCount;
+        //    //for(int y = 0;y<ny;y++)
+        //    //{
+
+        //    Parallel.For(0, ny, options, delegate (int y)
+        //    {
+        //        for (int x = 0; x < nx; x++)
+        //        {
+        //            //if (x==192 && y==55)
+        //            //{
+        //            //    int a = 1;
+        //            //}
+        //            double v1;
+        //            double v2;
+        //            double vT;
+        //            double vF;
+        //            if (is1ASC == true)
+        //            {
+        //                v1 = asc1[x, y];
+        //            }
+        //            else
+        //            { v1 = value1; }
+
+        //            if (is2ASC == true)
+        //            {
+        //                v2 = asc2[x, y];
+        //            }
+        //            else
+        //            { v2 = value2; }
+
+        //            if (isTasc == true)
+        //            {
+        //                vT = ascT[x, y];
+        //            }
+        //            else
+        //            { vT = valueT; }
+
+        //            if (isFasc == true)
+        //            {
+        //                vF = ascF[x, y];
+        //            }
+        //            else
+        //            { vF = valueF; }
+        //            resultArr[x, y] = cCalculator.conditionalCal(ConOperator, v1, v2, vT, vF, nodataValue);
+        //        }
+        //    });
+        //    //}
+        //    return resultArr;
+        //}
+
         public static double[,] calculate2DArryUsingCondition(string ConOperator, bool is1ASC, bool is2ASC, bool isTasc, bool isFasc,
+                        bool is1ASCnodataAsZero, bool is2ASCnodataAsZero, bool isTrueASCnodataAsZero, bool isFalseASCnodataAsZero,
             double[,] asc1 = null, double[,] asc2 = null, double[,] ascT = null, double[,] ascF = null,
             double value1 = 0, double value2 = 0, double valueT = 0, double valueF = 0,
             double nodataValue = -9999)
@@ -251,27 +317,52 @@ namespace gentle
                     double vT;
                     double vF;
                     if (is1ASC == true)
-                    { v1 = asc1[x, y]; }
+                    { v1 = asc1[x, y];
+                        if (is1ASCnodataAsZero == true && v1 == nodataValue) { v1 = 0; }
+                    }
                     else
                     { v1 = value1; }
 
                     if (is2ASC == true)
-                    { v2 = asc2[x, y]; }
+                    { v2 = asc2[x, y];
+                        if (is2ASCnodataAsZero == true && v2 == nodataValue) { v2 = 0; }
+                    }
                     else
                     { v2 = value2; }
 
                     if (isTasc == true)
-                    { vT = ascT[x, y]; }
+                    { vT = ascT[x, y];
+                        if (isTrueASCnodataAsZero == true && vT == nodataValue) { vT = 0; }
+                    }
                     else
                     { vT = valueT; }
 
                     if (isFasc == true)
-                    { vF = ascF[x, y]; }
+                    { vF = ascF[x, y];
+                        if (isFalseASCnodataAsZero == true && vF == nodataValue) { vF = 0; }
+                    }
                     else
                     { vF = valueF; }
 
-                    resultArr[x, y] = cCalculator.conditionalCal(ConOperator, v1, v2, vT, vF, nodataValue);
-                }
+                    bool goCal = true;
+                    if (is1ASC == true && is1ASCnodataAsZero == false && v1 == nodataValue)
+                    { goCal = false; }
+                    if (is2ASC == true && is2ASCnodataAsZero == false && v2 == nodataValue)
+                    { goCal = false; }
+                    if (isTasc == true && isTrueASCnodataAsZero == false && vT == nodataValue)
+                    { goCal = false; }
+                    if (is2ASC == true && isFalseASCnodataAsZero == false && vF == nodataValue)
+                    { goCal = false; }
+
+                    if (goCal == true)
+                    {
+                        resultArr[x, y] = cCalculator.conditionalCal(ConOperator, v1, v2, vT, vF, nodataValue);
+                    }
+                    else
+                    {
+                        resultArr[x, y] = nodataValue;
+                    }
+                    }
             });
             //}
             return resultArr;
